@@ -1,0 +1,84 @@
+{
+  "requests": [
+    {
+      "name": "add user" ,
+
+      "request": {
+        "login": "xXvasyaXx" ,
+        "password": "my_secret_password"
+      },
+
+      "responses": [
+        {
+          "code": "200",
+          "token": "some_token"
+        },
+        {
+          "code": "409",
+          "description": "Same login is already exists"
+        }
+      ]
+    },
+    {
+      "name": "login" ,
+
+      "request": {
+        "login": "xXvasyaXx" ,
+        "password": "my_secret_password"
+      },
+      "responses":[
+        {
+          "code": "200",
+          "token": "some_token"
+        },
+        {
+          "code": "403",
+          "description": "Bad credentials"
+        },
+        {
+          "code": "404",
+          "description": "no user with such name"
+        }
+
+      ]
+    },
+    {
+      "name": "send certificates" ,
+
+      "request": {
+        "token": "some_token",
+        "to_user": "xXvasyaXx",
+        "amount": 123
+      },
+      "responses":[
+        {
+          "code": "200"
+        },
+        {
+          "code": "404",
+          "description": "No such user"
+        },
+        {
+          "code": "hz",
+          "description": "Not enough certificates"
+        }
+      ]
+    },
+    {
+      "name": "buy time",
+      "request": {
+        "token": "some_token",
+        "schedule_id": 123
+      },
+      "responses":[
+        {
+          "code": "200"
+        },
+        {
+          "code": "hz",
+          "description": "Not enough certificates"
+        }
+      ]
+    },
+  ]
+}
