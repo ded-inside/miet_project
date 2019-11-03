@@ -1,8 +1,8 @@
 {
   "requests": [
     {
-      "name": "add user" ,
-
+      "method": "POST",
+      "path": "/add/user" ,
       "request": {
         "login": "xXvasyaXx" ,
         "password": "my_secret_password"
@@ -20,8 +20,8 @@
       ]
     },
     {
-      "name": "login" ,
-
+      "method": "POST",
+      "path": "/login" ,
       "request": {
         "login": "xXvasyaXx" ,
         "password": "my_secret_password"
@@ -43,8 +43,8 @@
       ]
     },
     {
-      "name": "send certificates" ,
-
+      "method": "POST",
+      "path": "certificates/send" ,
       "request": {
         "token": "some_token",
         "to_user": "xXvasyaXx",
@@ -65,7 +65,8 @@
       ]
     },
     {
-      "name": "buy time",
+      "method": "POST",
+      "path": "/{login}/schedule/buy",
       "request": {
         "token": "some_token",
         "schedule_id": 123
@@ -80,5 +81,144 @@
         }
       ]
     },
+    {
+      "method": "POST",
+      "path": "/logout",
+      "request": {
+        "token": "some_token"
+      },
+      "responses":[
+        {
+          "code": "200"
+        },
+        {
+          "code": "403",
+          "description": "Bad credentials"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/data/load",
+      "request": {
+        "token": "some_token"
+      },
+      "responses":[
+        {
+          "code": "200",
+          "data": {
+            "login": "xXvasyaXx",
+            "certificate_balance": 123
+          }
+        },
+        {
+          "code": "403",
+          "description": "Bad credentials"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/{login}",
+      "request": {
+        "token": "some_token"
+      },
+      "responses":[
+        {
+          "code": "200",
+          "data": {
+            "login": "xXvasyaXx",
+            "certificates_count": 123
+          }
+        },
+        {
+          "code": "403",
+          "description": "Bad credentials"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/{login}/schedule",
+      "request": {
+        "token": "some_token"
+      },
+      "responses":[
+        {
+          "code": "200",
+          "data": {
+            "login": "xXvasyaXx",
+            "certificates_count": 123,
+            "schedule": [
+              {
+                "DateTime": "13:00 Kogda-nibud",
+                "Cost": 123,
+                "Duration": "01:00"
+              }
+            ]
+          }
+        },
+        {
+          "code": "403",
+          "description": "Bad credentials"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/schedule/add",
+      "request": {
+        "token": "some_token",
+        "schedule": [
+              {
+                "DateTime": "13:00 Kogda-nibud",
+                "Cost": 123,
+                "Duration": "01:00"
+              }
+            ]
+      },
+      "responses":[
+        {
+          "code": "200"
+        },
+        {
+          "code": "409",
+          "description": "Overlaps with existing"
+        },
+        {
+          "code": "400",
+          "description": "Bad something"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/schedule/set",
+      "request": {
+        "token": "some_token",
+        "schedule_id": 111,
+        "schedule": [
+              {
+                "DateTime": "13:00 Kogda-nibud",
+                "Cost": 123,
+                "Duration": "01:00"
+              }
+            ]
+      },
+      "responses":[
+        {
+          "code": "200"
+        },
+        {
+          "code": "409",
+          "description": "Overlaps with existing"
+        },
+        {
+          "code": "400",
+          "description": "Bad something"
+        }
+      ]
+    }
+
   ]
 }
