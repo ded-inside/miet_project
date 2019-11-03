@@ -33,8 +33,9 @@ class Member(db.Model):
     certificates = relationship("Certificate", back_populates="owner")
 
 
-    def __init__(self, login):
+    def __init__(self, login, password_hash):
         self.login = login
+        self.password_hash = password_hash
 
 
 class Schedule(db.Model):
