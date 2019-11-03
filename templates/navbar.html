@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <nav>
+        <div class="nav-bar">
+            <div class="nav-item">
+                <span>Главная</span>
+            </div>
+            <div class="nav-item">
+                <span>Магазин</span>
+            </div>
+        </div>
+        <div class="nav-bar" style="margin-left: auto;">
+            {% if user %}
+            <div class="nav-item">
+                <span>Лчиный кабинет</span>
+            </div>
+            {% else %}
+            <div class="nav-item">
+                <span>Войти</span>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+{% endblock %}
