@@ -1,14 +1,15 @@
 {% extends 'base.html' %}
 
 {% block head %}
+    {% block head1 %}{% endblock %}
 {% endblock %}
 
 {% block content %}
     <nav>
         <div class="nav-bar">
-            <div class="nav-item">
+            <a class="nav-item" href="/">
                 <span>Главная</span>
-            </div>
+            </a>
             <div class="nav-item">
                 <span>Магазин</span>
             </div>
@@ -16,13 +17,15 @@
         <div class="nav-bar" style="margin-left: auto;">
             {% if user %}
             <div class="nav-item">
-                <span>Лчиный кабинет</span>
+                <span>Личиный кабинет</span>
             </div>
             {% else %}
-            <div class="nav-item">
+            <a class="nav-item" href="/login">
                 <span>Войти</span>
-            </div>
+            </a>
             {% endif %}
         </div>
     </nav>
+	<div style="padding-bottom: 160px;"></div>
+    {% block content1 %}{% endblock %}
 {% endblock %}

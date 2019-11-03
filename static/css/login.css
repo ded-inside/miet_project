@@ -1,0 +1,38 @@
+.content {
+    width: 35%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.login-form {
+    padding-left: 20%;
+    padding-right: 20%;
+    padding-bottom: 70px;
+    margin-top: 50px;
+    background-color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 7px;
+}
+.login-form > * {
+    margin: 10px;
+    color: var(--color-text-one);
+}
+input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px;
+    font-size: 18px;
+    color: #000;
+    border: 1px solid #000;
+    border-radius: 2px;
+}
+input[type='text'], input[type='password'] {
+    box-shadow: inset 0px 0px 10px -5px var(--color-shadow);
+}
+input[type='submit'] {
+}
+input::placeholder {
+    font-style: italic;
+    color: var(--color-text-one);
+}

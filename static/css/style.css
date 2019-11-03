@@ -3,7 +3,8 @@
 	--color-one: #086fa1;
 	--color-two: #1240ab;
 	--color-three: #00a876;
-	--color-text: #c0c0c0;
+	--color-text-main: #c0c0c0;
+	--color-text-one: #a0a0a0;
     --color-shadow: #235d79;
 	--color-link-hover: #ffffff;
 }
@@ -12,7 +13,7 @@
 	margin: 0;
 	padding: 0;
 	text-decoration: none;
-	color: var(--color-text);
+	color: var(--color-text-main);
 	font-size: 1em;
 	font-family: sans-serif;
 }
@@ -40,4 +41,8 @@ nav {
 .nav-item:hover {
 	background-color: var(--color-bg);
 	color: var(--color-link-hover);
+}
+.text-title {
+	font-size: 2rem;
+	padding: 20px;
 }
