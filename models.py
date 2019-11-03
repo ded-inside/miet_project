@@ -12,8 +12,8 @@ class Session(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    user = relationship("User", uselist=False, back_populates="session")
+    user_id = db.Column(db.Integer, db.ForeignKey("members.id"))
+    user = relationship("Member", uselist=False, back_populates="session")
 
     token = db.Column(db.String)
 
@@ -28,7 +28,7 @@ class Member(db.Model):
     login = db.Column(db.String)
     password_hash = db.Column(db.String)
 
-    session_id = db.Column(db.Integer, db.ForeignKey("session.id"))
+    session_id = db.Column(db.Integer, db.ForeignKey("sessions.id"))
     session = relationship("Session", uselist=False, back_populates="user")
 
     certificates = relationship("Certificate", back_populates="owner")
@@ -51,7 +51,7 @@ class ScheduleEntry(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    schedule_id = db.Column(db.Integer, db.ForeignKey("schedule.id"))
+    schedule_id = db.Column(db.Integer, db.ForeignKey("schedules.id"))
     schedule = relationship("Schedule", back_populates="entries")
 
 
@@ -60,13 +60,13 @@ class Transaction(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    from_id = db.Column(db.Integer, db.ForeignKey("member.id"))
+    from_id = db.Column(db.Integer, db.ForeignKey("members.id"))
 
-    to_id = db.Column(db.Integer, db.ForeignKey("member.id"))
+    to_id = db.Column(db.Integer, db.ForeignKey("members.id"))
 
-
-class Club(db.Model):
-    pass
+#
+# class Club(db.Model):
+#     pass
 
 
 class Certificate(db.Model):
@@ -74,7 +74,7 @@ class Certificate(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    owner_id = db.Column(db.Integer, db.ForeignKey("member.id"))
+    owner_id = db.Column(db.Integer, db.ForeignKey("members.id"))
     owner = relationship("Member", back_populates="certificates")
 
 
