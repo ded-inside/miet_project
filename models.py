@@ -12,7 +12,6 @@ class Session(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    user_id = db.Column(db.Integer, db.ForeignKey("members.id"))
     user = relationship("Member", uselist=False, back_populates="session")
 
     token = db.Column(db.String)
@@ -25,17 +24,17 @@ class Member(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    login = db.Column(db.String)
-    password_hash = db.Column(db.String)
+    login = db.Column(db.String, nullable=False)
+    password_hash = db.Column(db.String, nullable=False)
 
     session_id = db.Column(db.Integer, db.ForeignKey("sessions.id"))
-    session = relationship("Session", uselist=False, back_populates="user")
+    session = relationship("Session", back_populates="user")
 
     certificates = relationship("Certificate", back_populates="owner")
 
 
-    def __init__(self, username):
-        self.username = username
+    def __init__(self, login):
+        self.login = login
 
 
 class Schedule(db.Model):
