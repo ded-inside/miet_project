@@ -10,7 +10,34 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 
 db = SQLAlchemy(app)
 from models import *
+
 db.create_all()
+
+Member.query.delete()
+Certificate.query.delete()
+db.session.commit()
+member1 = Member("Member1", "Member1")
+member2 = Member("Member2", "Member2")
+db.session.add(member1)
+db.session.add(member2)
+for _ in range(10):
+    cert = Certificate()
+    cert.owner = member1
+    cert.owner_id = member1.id
+    db.session.add(cert)
+
+schedule = Schedule()
+member1.schedule = schedule
+member1.schedule_id = schedule.id
+
+s_entry = ScheduleEntry()
+s_entry.schedule_id = schedule.id
+s_entry.schedule = schedule
+s_entry.name = "Christmas event"
+s_entry.date = datetime.datetime(year=2019, month=12, day=25)
+db.session.add(s_entry)
+
+db.session.commit()
 
 
 # """
@@ -26,23 +53,49 @@ def login():
 
 @app.route("/certificates/send")
 def certificates_send():
-    pass
+    m1 = db.session.query(Member).filter_by(id=1).first()
+    m2 = db.session.query(Member).filter_by(id=2).first()
+    certs = db.session.query(Certificate).filter_by(owner_id=m1.id)
+    for i in range(certs.count() // 2):
+        certs[i].owner_id = m2.id
+
+    db.session.commit()
+    return "kk"
 
 
+@app.route("/<_login>")
+def _login(_login: str):
+    return jsonify(code=200, data={"login": "Member2", "about": "doing stuff for money"})
 
-@app.route("/<login>")
-def _login(login: str):
-    pass
 
+@app.route("/<_login>/schedule", methods=["GET"])
+def _login_schedule(_login: str):
+    # sched = db.session.query(Schedule).join(Member).filter_by(login=_login).first()
+    # if not sched:
+    #     return "no schedule"
 
-@app.route("/<login>/schedule")
-def _login_schedule(login: str):
-    pass
+    return jsonify(code=200,
+                   data={
+                       "login": "xXvasyaXx",
+                       "certificates_count": 123,
+                       "schedule": [
+                           {
+                               "DateTime": "13:00 25.12.2019",
+                               "Cost": 1,
+                               "Duration": "01:00"
+                           }
+                       ]
+                   })
 
 
 @app.route("/<login>/schedule/buy")
 def _login_schedule_buy(login: str):
-    pass
+    schedule_id = 1
+    member = db.session.query(Member).filter_by(login=login).first()
+    if not member:
+        return abort(400)
+
+    return "iii"
 
 
 @app.route("/schedule/add")
@@ -101,11 +154,10 @@ def hello_world():
 
 @app.route("/test2")
 def test():
-    a = Member.query.all()
-    member = a[-1]
-    return jsonify(login=member.login,id=member.id,pass_hash=member.password_hash)
+
+    return "ok"
 
 
 if __name__ == '__main__':
-    Member.query.delete()
+    print("LOL")
     app.run()
