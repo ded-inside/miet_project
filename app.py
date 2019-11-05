@@ -19,7 +19,53 @@ db.create_all()
 #
 #     return: token:string
 # """
-@app.route("/add/member", methods=['POST'])
+@app.route("/login")
+def login():
+    return jsonify(code=200, token="secret_token")
+
+
+@app.route("/certificates/send")
+def certificates_send():
+    pass
+
+
+
+@app.route("/<login>")
+def _login(login: str):
+    pass
+
+
+@app.route("/<login>/schedule")
+def _login_schedule(login: str):
+    pass
+
+
+@app.route("/<login>/schedule/buy")
+def _login_schedule_buy(login: str):
+    pass
+
+
+@app.route("/schedule/add")
+def schedule_add():
+    pass
+
+
+@app.route("/schedule/set")
+def schedule_set():
+    pass
+
+
+@app.route("/logout")
+def logout():
+    pass
+
+
+@app.route("/data/load")
+def data_load():
+    pass
+
+
+@app.route("/add/user", methods=['POST'])
 def add_member():
     json = request.get_json()
     if not json:
@@ -46,11 +92,11 @@ def add_member():
 
 @app.route('/test1')
 def hello_world():
-    member = Member("test")
-    member.password_hash = "123"
+    member = Member("test", "123")
+    # member.password_hash = "123"
     db.session.add(member)
     db.session.commit()
-    return "ok"
+    return "okokoko"
 
 
 @app.route("/test2")
@@ -61,4 +107,5 @@ def test():
 
 
 if __name__ == '__main__':
+    Member.query.delete()
     app.run()
