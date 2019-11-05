@@ -61,6 +61,10 @@ class ScheduleEntry(db.Model):
     schedule_id = db.Column(db.Integer, db.ForeignKey("schedules.id"))
     schedule = relationship("Schedule", back_populates="entries")
 
+    date = db.Column(db.DateTime, nullable=False)
+
+    name = db.Column(db.String)
+
 
 class Transaction(db.Model):
     __tablename__ = "transactions"
