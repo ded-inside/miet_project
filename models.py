@@ -49,7 +49,7 @@ class Schedule(db.Model):
 
     entries = relationship("ScheduleEntry", back_populates="schedule")
 
-    owner_id = db.Column(db.Integer, db.ForeignKey("members.id"))
+    # owner_id = db.Column(db.Integer, db.ForeignKey("members.id"))
     owner = relationship("Member", uselist=False, back_populates="schedule")
 
 
