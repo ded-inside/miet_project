@@ -32,6 +32,10 @@ class Member(db.Model):
 
     certificates = relationship("Certificate", back_populates="owner")
 
+    schedule_id = db.Column(db.Integer, db.ForeignKey("schedules.id"))
+    schedule = relationship("Schedule", back_populates="owner")
+
+    about = db.Column(db.String,default="")
 
     def __init__(self, login, password_hash):
         self.login = login
@@ -44,6 +48,9 @@ class Schedule(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     entries = relationship("ScheduleEntry", back_populates="schedule")
+
+    owner_id = db.Column(db.Integer, db.ForeignKey("members.id"))
+    owner = relationship("Member", uselist=False, back_populates="schedule")
 
 
 class ScheduleEntry(db.Model):
