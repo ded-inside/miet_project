@@ -64,13 +64,12 @@ class Transaction(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
+    cert_id = db.column(db.Integer, db.ForeignKey("certificates.id"))
+
     from_id = db.Column(db.Integer, db.ForeignKey("members.id"))
 
     to_id = db.Column(db.Integer, db.ForeignKey("members.id"))
 
-#
-# class Club(db.Model):
-#     pass
 
 
 class Certificate(db.Model):
@@ -86,39 +85,3 @@ class Log(db.Model):
     __tablename__ = "logs"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-# class Chat(db.Model):
-#     __tablename__ = "chats"
-#
-#     id = db.Column(db.Integer, primary_key=True)
-#
-#     name = db.Column(db.String)
-#
-#     users = relationship("User",
-#                          secondary=cross_table,
-#                          back_populates="chats")
-#
-#     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-#
-#     messages = relationship("Message", back_populates="chat")
-#
-#     def __init__(self, name):
-#         self.name = name
-#
-#
-# class Message(db.Model):
-#     __tablename__ = "messages"
-#
-#     id = db.Column(db.Integer, primary_key=True)
-#
-#     chat = relationship("Chat", back_populates="messages")
-#     chat_id = db.Column(db.Integer, db.ForeignKey('chats.id'))
-#
-#     author = relationship("User", back_populates="messages")
-#     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-#
-#     text = db.Column(db.Text)
-#
-#     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-#
-#     def __init__(self, text):
-#         self.text = text
