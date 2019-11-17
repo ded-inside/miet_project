@@ -37,7 +37,7 @@ class Member(db.Model):
 
     entries = relationship("ScheduleEntry", back_populates="owner")
 
-    about = db.Column(db.String,default="")
+    about = db.Column(db.String, default="")
 
     def __init__(self, login, password_hash):
         self.login = login
