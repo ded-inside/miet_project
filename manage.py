@@ -38,6 +38,7 @@ class DemoStateCommand(Command):
         s_entry = ScheduleEntry()
         s_entry.name = "XMas event"
         s_entry.date = datetime.date(year=2019, month=12, day=25)
+        s_entry.price = 40
         # s_entry.owner = man_with_event
         s_entry.owner_id = man_with_event.id
 

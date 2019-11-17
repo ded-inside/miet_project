@@ -54,6 +54,8 @@ class ScheduleEntry(db.Model):
 
     buyer_id = db.Column(db.Integer, db.ForeignKey("members.id"))
 
+    price = db.Column(db.Integer)
+
     name = db.Column(db.String)
 
 
