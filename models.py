@@ -30,12 +30,9 @@ class Member(db.Model):
     session_id = db.Column(db.Integer, db.ForeignKey("sessions.id"), nullable=True)
     session = relationship("Session", back_populates="user")
 
-    certificates = relationship("Certificate", back_populates="owner")
+    # certificates = relationship("Certificate", back_populates="owner")
 
-    schedule_id = db.Column(db.Integer, db.ForeignKey("schedules.id"))
-    schedule = relationship("Schedule", back_populates="owner")
-
-    entries = relationship("ScheduleEntry", back_populates="owner")
+    # entries = relationship("ScheduleEntry", back_populates="owner")
 
     about = db.Column(db.String, default="")
 
@@ -50,9 +47,10 @@ class ScheduleEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     owner_id = db.Column(db.Integer, db.ForeignKey("members.id"))
-    owner = relationship("Member", back_populates="entries")
+    # owner = relationship("Member", back_populates="entries")
 
     date = db.Column(db.DateTime, nullable=False)
+    duration = db.Column(db.DateTime)
 
     buyer_id = db.Column(db.Integer, db.ForeignKey("members.id"))
 
@@ -78,7 +76,7 @@ class Certificate(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     owner_id = db.Column(db.Integer, db.ForeignKey("members.id"))
-    owner = relationship("Member", back_populates="certificates")
+    # owner = relationship("Member", back_populates="certificates")
 
 
 class Log(db.Model):
