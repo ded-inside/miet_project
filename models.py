@@ -27,7 +27,7 @@ class Member(db.Model):
     login = db.Column(db.String, nullable=False)
     password_hash = db.Column(db.String, nullable=False)
 
-    session_id = db.Column(db.Integer, db.ForeignKey("sessions.id"))
+    session_id = db.Column(db.Integer, db.ForeignKey("sessions.id"), nullable=True)
     session = relationship("Session", back_populates="user")
 
     certificates = relationship("Certificate", back_populates="owner")
@@ -42,26 +42,17 @@ class Member(db.Model):
         self.password_hash = password_hash
 
 
-class Schedule(db.Model):
-    __tablename__ = "schedules"
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-
-    entries = relationship("ScheduleEntry", back_populates="schedule")
-
-    # owner_id = db.Column(db.Integer, db.ForeignKey("members.id"))
-    owner = relationship("Member", uselist=False, back_populates="schedule")
-
-
 class ScheduleEntry(db.Model):
     __tablename__ = "schedule_entries"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    schedule_id = db.Column(db.Integer, db.ForeignKey("schedules.id"))
-    schedule = relationship("Schedule", back_populates="entries")
+    owner_id = db.Column(db.Integer, db.ForeignKey("members.id"))
+    owner = relationship("Member", back_populates="entries")
 
     date = db.Column(db.DateTime, nullable=False)
+
+    buyer_id = db.Column(db.Integer, db.ForeignKey("members.id"))
 
     name = db.Column(db.String)
 
