@@ -35,6 +35,8 @@ class Member(db.Model):
     schedule_id = db.Column(db.Integer, db.ForeignKey("schedules.id"))
     schedule = relationship("Schedule", back_populates="owner")
 
+    entries = relationship("ScheduleEntry", back_populates="owner")
+
     about = db.Column(db.String,default="")
 
     def __init__(self, login, password_hash):
