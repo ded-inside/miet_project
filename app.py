@@ -36,7 +36,7 @@ def login():
     if not(login and pswd):
         return abort(400)
 
-    member = db.session.query(Member).filter_by(login=_login).first()
+    member = db.session.query(Member).filter_by(login=login).first()
     if not member:
         return abort(400)
 

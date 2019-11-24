@@ -4,6 +4,7 @@ from time import sleep
 from app import app, db
 from models import *
 
+from app import calc_hash
 from flask_sqlalchemy import SQLAlchemy
 
 app.config['DEBUG'] = True
@@ -21,10 +22,10 @@ class DemoStateCommand(Command):
             db.session.query(model).delete()
         db.session.commit()
 
-        man_with_certs = Member("Alice", "Alice_password")
+        man_with_certs = Member("Alice", calc_hash("Alice_password"))
         db.session.add(man_with_certs)
 
-        man_with_event = Member("Bob", "Bob_password")
+        man_with_event = Member("Bob", calc_hash("Bob_password"))
         db.session.add(man_with_event)
 
         db.session.commit()
@@ -49,7 +50,7 @@ class DemoStateCommand(Command):
 
 manager.add_command('db', MigrateCommand)
 
-manager.add_command('default_state', DemoStateCommand())
+manager.add_command('demostate', DemoStateCommand())
 
 if __name__ == "__main__":
     manager.run()
