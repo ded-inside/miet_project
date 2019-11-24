@@ -15,20 +15,45 @@ from models import *
 
 db.create_all()
 
-@app.route("/login")
+
+def calc_hash(pswd: str):
+    return pswd[::-1]
+
+
+def calc_token(data: str):
+    return data
+
+
+@app.route("/login", methods=['POST'])
 def login():
-    return jsonify(code=200, token="secret_token")
+    json = request.get_json()
+    if not json:
+        return abort(400)
+
+    login = json["login"]
+    pswd = json["password"]
+
+    if not(login and pswd):
+        return abort(400)
+
+    member = db.session.query(Member).filter_by(login=_login).first()
+    if not member:
+        return abort(400)
+
+    if member.password_hash != calc_hash(pswd):
+        return abort(400)
+
+    sess = Session()
+    member.session = sess
+    member.session_id = sess.id
+
+    sess.token = calc_token("secret_token")
+
+    return jsonify(code=200, token=sess.token)
 
 
 @app.route("/certificates/send")
 def certificates_send():
-    m1 = db.session.query(Member).filter_by(id=1).first()
-    m2 = db.session.query(Member).filter_by(id=2).first()
-    certs = db.session.query(Certificate).filter_by(owner_id=m1.id)
-    for i in range(certs.count() // 2):
-        certs[i].owner_id = m2.id
-
-    db.session.commit()
     return "kk"
 
 
@@ -39,10 +64,6 @@ def _login(_login: str):
 
 @app.route("/<_login>/schedule", methods=["GET"])
 def _login_schedule(_login: str):
-    # sched = db.session.query(Schedule).join(Member).filter_by(login=_login).first()
-    # if not sched:
-    #     return "no schedule"
-
     return jsonify(code=200,
                    data={
                        "login": "xXvasyaXx",
@@ -57,10 +78,10 @@ def _login_schedule(_login: str):
                    })
 
 
-@app.route("/<login>/schedule/buy")
-def _login_schedule_buy(login: str):
+@app.route("/<_login>/schedule/buy")
+def _login_schedule_buy(_login: str):
     schedule_id = 1
-    member = db.session.query(Member).filter_by(login=login).first()
+    member = db.session.query(Member).filter_by(login=_login).first()
     if not member:
         return abort(400)
 
@@ -99,7 +120,6 @@ def add_member():
     if not login or not password:
         return abort(400)
 
-    # todo add hash generation
     password_hash = password[::-1]
 
     member = db.session.query(Member).filter_by(login=login).first()
