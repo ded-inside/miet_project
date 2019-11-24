@@ -52,7 +52,7 @@ class ScheduleEntry(db.Model):
     date = db.Column(db.DateTime, nullable=False)
     duration = db.Column(db.DateTime)
 
-    buyer_id = db.Column(db.Integer, db.ForeignKey("members.id"))
+    buyer_id = db.Column(db.Integer, db.ForeignKey("members.id"), nullable=True)
 
     price = db.Column(db.Integer)
 
