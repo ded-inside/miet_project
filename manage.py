@@ -21,10 +21,10 @@ class DemoStateCommand(Command):
             db.session.query(model).delete()
         db.session.commit()
 
-        man_with_certs = Member("Alice", "password")
+        man_with_certs = Member("Alice", "Alice_password")
         db.session.add(man_with_certs)
 
-        man_with_event = Member("Bob", "password")
+        man_with_event = Member("Bob", "Bob_password")
         db.session.add(man_with_event)
 
         db.session.commit()

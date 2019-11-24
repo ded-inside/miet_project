@@ -1,3 +1,4 @@
+sqlalchemy
 backcall==0.1.0
 Click==7.0
 colorama==0.4.1
