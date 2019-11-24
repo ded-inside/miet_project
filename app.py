@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask import request
-from datetime import datetime
+import datetime
 
 
 app = Flask(__name__)
@@ -14,6 +14,16 @@ db = SQLAlchemy(app)
 from models import *
 
 db.create_all()
+
+
+def get_member(token: str):
+    sess = db.session.query(Session).filter_by(token=token).first()
+    if not sess:
+        return None
+
+    member = db.session.query(Member).filter_by(session_id=sess.id).first()
+
+    return member
 
 
 def calc_hash(pswd: str):
@@ -92,9 +102,41 @@ def _login_schedule_buy(_login: str):
     return "iii"
 
 
-@app.route("/schedule/add")
+@app.route("/schedule/add", methods=["POST", ])
 def schedule_add():
-    pass
+    # "Sun, 24 Nov 2019 22:59:44 GMT"
+    # '25/12/19 00:00'
+    # "%d/%m/%y %H:%M"
+    json = request.get_json()
+    token = json["token"]
+    member = get_member(token)
+    if not member:
+        abort(400)
+    schedule = json["schedule"][0]
+    name = schedule["Name"]
+    dt = schedule["DateTime"]
+    dt = datetime.datetime.strptime(dt, "%d/%m/%y %H:%M")
+    # todo check if past
+
+    cost = int(schedule["Cost"])
+    # "Duration": "01:00",
+    duration = schedule["Duration"]
+    duration = datetime.datetime.strptime(duration,"%H:%M")
+
+    se = ScheduleEntry()
+
+    se.owner_id = member.id
+    se.date = dt
+    se.duration = duration
+    se.price = cost
+    se.name = name
+
+    db.session.add(se)
+
+    db.session.commit()
+
+
+    return jsonify(code=200)
 
 
 @app.route("/schedule/set")
