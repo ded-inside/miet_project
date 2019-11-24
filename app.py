@@ -47,7 +47,11 @@ def login():
     member.session = sess
     member.session_id = sess.id
 
-    sess.token = calc_token("secret_token")
+    sess.token = calc_token(member.login+"secret_token")
+
+    db.session.add(sess)
+
+    db.session.commit()
 
     return jsonify(code=200, token=sess.token)
 
