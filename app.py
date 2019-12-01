@@ -200,6 +200,7 @@ if __name__ == '__main__':
 def login():
     return 'login'
 
+
 @app.route("/logout", methods=["POST"])
 def logout():
     json = request.get_json()
