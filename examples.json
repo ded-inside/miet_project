@@ -168,12 +168,13 @@
       "method": "POST",
       "path": "/schedule/add",
       "request": {
-        "token": "some_token",
+        "token": "Alicesecret_token",
         "schedule": [
               {
-                "DateTime": "13:00 Kogda-nibud",
+                "DateTime": "Sun, 24 Nov 2019 22:59:44 GMT",
                 "Cost": 123,
-                "Duration": "01:00"
+                "Duration": "01:00",
+                "Name": "XMAS event"
               }
             ]
       },
