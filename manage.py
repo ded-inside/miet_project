@@ -17,6 +17,12 @@ manager = Manager(app)
 
 
 class DemoStateCommand(Command):
+    '''
+        run /python manage.py db init
+        -------
+        run /python manage.py db upgrade
+        run /python manage.py demostate
+    '''
     def run(self):
         for model in (Session, Member, ScheduleEntry, Transaction, Certificate, Log):
             db.session.query(model).delete()
