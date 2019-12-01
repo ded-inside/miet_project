@@ -196,3 +196,63 @@ def test():
 if __name__ == '__main__':
     print("LOL")
     app.run()
+@app.route('/login')
+def login():
+    return 'login'
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    json = request.get_json()
+    if not json:
+        return abort(400)
+
+    token = json["token"]
+    if not token:
+        return abort(400)
+
+    session = db.session.query(Session).filter_by(token=token).first()
+    if not session:
+        return jsonify(code=403, description="Bad credentials")
+    db.session.delete(session)
+    db.session.commit()
+
+    return jsonify(code=200)
+
+
+@app.route("/{login}/schedule/{s_id}/buy", methods=["POST"])
+def login_schedule_buy(login: str, s_id: int):
+    json = request.get_json()
+    if not json:
+        return abort(400)
+
+    token = json["token"]
+    if not token:
+        return abort(400)
+
+    session = db.session.query(Session).filter_by(token=token).first()
+    if not session:
+        return jsonify(code=403, description="Bad credentials")
+
+    schedule = db.session.query(ScheduleEntry).filter_by(id=s_id)
+    buyer = db.session.query(Member).filter_by(session=session).first()
+    seller = db.session.query(Member).filter_by(login=login).first()
+    certs = db.session.query(Certificate).filter_by(owner_id=buyer.id)
+
+    if schedule.price > certs.count():
+        return jsonify(code=100, description="Not enough certificates")
+
+    for i in range(schedule.price):
+        certs[i].owner_id = seller.id
+
+    db.session.commit()
+    return jsonify(code=200)
+
+
+
+
+
+
+
+
+
