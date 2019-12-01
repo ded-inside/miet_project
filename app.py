@@ -248,49 +248,7 @@ def login_schedule_buy(login: str, s_id: int):
     return jsonify(code=200)
 
 
-@app.route("/schedule/add")
-def schedule_add():
-    json = request.get_json()
-    if not json:
-        return abort(400)
 
-    token = json["token"]
-    if not token:
-        return abort(400)
-
-    schedule = json["schedule"]
-    if not schedule:
-        return abort(400)
-
-    dateTimeStart = schedule["Datetime"]
-    if not datetime:
-        return abort(400)
-
-    cost = schedule["Cost"]
-    if not cost:
-        return abort(400)
-
-    duration = schedule["Duration"]
-    if not duration:
-        return abort(400)
-
-    schedule_id = json["schedule_id"]
-    if not schedule_id:
-        return abort(400)
-
-    session = db.session.query(Session).filter_by(token=token).first()
-    if not session:
-        return jsonify(code=403, description="Bad credentials")
-
-    member = db.session.query(Member).filter_by(session=session).first()
-    dateTimeEnd = dateTimeStart + duration
-    schedule = db.session.query(ScheduleEntry).filter_by(owner_id=member.id)
-
-    for i in range(schedule.count()):
-        dateTimeStartForExistsSchedule = schedule.date
-        dateTimeEndForExistsSchedule = schedule.date + schedule.duration
-
-        if (dateTimeStart < d)
 
 
 
