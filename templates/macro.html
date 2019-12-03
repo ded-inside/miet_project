@@ -1,0 +1,5 @@
+{% macro nav_item(text, url, is_active=false) %}
+    <li class="nav-item">
+        <a class="nav-link {% if is_active %}active{% endif %}" href="{{ url }}">{{ text }}</a>
+    </li>
+{% endmacro %}
