@@ -18,6 +18,10 @@ class Session(db.Model):
 
     expires_at = db.Column(db.DateTime, default=datetime.datetime.now()+datetime.timedelta(hours=1))
 
+    def __init__(self, token, expires_at):
+        self.token = token
+        self.expires_at = expires_at
+
 
 class Member(db.Model):
     __tablename__ = "members"
@@ -58,6 +62,15 @@ class ScheduleEntry(db.Model):
 
     name = db.Column(db.String)
 
+    about = db.Column(db.Text)
+
+    def __init__(self, owner_id, date, duration, price, name):
+        self.owner_id = owner_id
+        self.date = date
+        self.duration = duration
+        self.price = price
+        self.name = name
+
 
 class Transaction(db.Model):
     __tablename__ = "transactions"
@@ -70,6 +83,13 @@ class Transaction(db.Model):
 
     to_id = db.Column(db.Integer, db.ForeignKey("members.id"))
 
+    date_time = db.Column(db.DateTime)
+
+    def __init__(self, cert_id, from_id, to_id, date_time):
+        self.cert_id = cert_id
+        self.from_id = from_id
+        self.to_id = to_id
+        self.date_time = date_time
 
 
 class Certificate(db.Model):
@@ -78,7 +98,9 @@ class Certificate(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     owner_id = db.Column(db.Integer, db.ForeignKey("members.id"))
-    # owner = relationship("Member", back_populates="certificates")
+
+    def __init__(self, owner_id):
+        self.owner_id = owner_id
 
 
 class Log(db.Model):
