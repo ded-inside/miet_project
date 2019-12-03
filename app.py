@@ -16,6 +16,15 @@ from models import *
 db.create_all()
 
 
+def get_member_data(mem: Member):
+    certs_count = db.session.query(Certificate).filter_by(owner_id=mem.id).count()
+    return jsonify(
+        login=mem.login,
+        about=mem.about,
+        certificates=certs_count
+    )
+
+
 def get_member(token: str):
     sess = db.session.query(Session).filter_by(token=token).first()
     if not sess:
