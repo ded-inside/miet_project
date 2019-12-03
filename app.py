@@ -189,6 +189,29 @@ def logout():
     return jsonify(code=200)
 
 
+def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry):
+    certs = list(db.session.query(Certificate).filter_by(owner_id=buyer.id).all())
+
+    transaction_list = []
+    trans_time = datetime.datetime.now()
+
+    for i in range(schedule.price):
+        certs[i].owner_id = seller.id
+
+        trns = Transaction()
+        trns.from_id = buyer.id
+        trns.to_id = buyer.id
+        trns.cert_id = certs[i].id
+        trns.date_time = trans_time
+        transaction_list.append(trns)
+
+    for trns in transaction_list:
+        db.session.add(trns)
+
+    schedule.buyer_id = buyer.id
+
+    db.session.commit()
+
 @app.route("/<_login>/schedule/<s_id>/buy", methods=["POST"])
 def login_schedule_buy(_login: str, s_id: int):
     json = request.get_json()
@@ -211,22 +234,5 @@ def login_schedule_buy(_login: str, s_id: int):
     if schedule.price > certs.count():
         return jsonify(code=100, description="Not enough certificates")
 
-    transaction_list = []
-    trans_time = datetime.datetime.now()
-    for i in range(schedule.price):
-        certs[i].owner_id = seller.id
-
-        trns = Transaction()
-        trns.from_id = buyer.id
-        trns.to_id = buyer.id
-        trns.cert_id = certs[i].id
-        trns.date_time = trans_time
-        transaction_list.append(trns)
-
-    for trns in transaction_list:
-        db.session.add(trns)
-
-    schedule.buyer_id = buyer.id
-
-    db.session.commit()
+    invoke_user_buy_event(buyer, seller, schedule)
     return jsonify(code=200)
