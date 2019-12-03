@@ -219,6 +219,46 @@
           "description": "Bad something"
         }
       ]
+    },
+{
+      "method": "POST",
+      "path": "/transactions",
+      "request": {
+        "token": "some_token"
+      },
+      "responses":[
+        {
+          "code": 200,
+          "data": {
+            "Buy": [
+              {
+                "Amount": 4,
+                "Date": "Wed, 04 Dec 2019 00:13:39 GMT"
+              }
+            ],
+            "Sell": [
+              {
+                "Amount": 40,
+                "Date": "Wed, 04 Dec 2019 00:13:39 GMT"
+              },
+              {
+                "Amount": 400,
+                "Date": "Wed, 04 Dec 2018 00:13:39 GMT"
+              }
+
+            ]
+          }
+
+        },
+        {
+          "code": "409",
+          "description": "Overlaps with existing"
+        },
+        {
+          "code": "400",
+          "description": "Bad something"
+        }
+      ]
     }
 
   ]

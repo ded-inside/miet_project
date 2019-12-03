@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, abort
-from flask import render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask import request
+from sqlalchemy import func
+from flask import render_template
 import datetime
 
 
@@ -84,11 +85,9 @@ def login():
     if member.password_hash != calc_hash(pswd):
         return abort(400)
 
-    sess = Session()
+    sess = Session(calc_token(member.login + "secret_token"), datetime.datetime(year=2019, month=12, day=30))
     member.session = sess
     member.session_id = sess.id
-
-    sess.token = calc_token(member.login + "secret_token")
 
     db.session.add(sess)
 
@@ -104,22 +103,42 @@ def certificates_send():
 
 @app.route("/<_login>")
 def _login(_login: str):
-    return jsonify(code=200, data={"login": "Member2", "about": "doing stuff for money"})
+    if not _login:
+        return abort(400)
+
+    member = db.session.query(Member).filter_by(login=_login).first()
+    if not member:
+        return abort(400)
+
+    return jsonify(200, data={"login": member.login, "about": member.about})
 
 
 @app.route("/<_login>/schedule", methods=["GET"])
 def _login_schedule(_login: str):
+    if not _login:
+        return abort(400)
+
+    member = db.session.query(Member).filter_by(login=_login).first()
+    if not member:
+        return abort(400)
+
+    schedule_entries = db.session.query(ScheduleEntry).filter_by(id=member.id).all()
+    if not schedule_entries:
+        return abort(400)
+
+    schedule_array = []
+    for entry in schedule_entries:
+        schedule_array.append({
+            "DateTime": entry.date_time,
+            "Cost": entry.price,
+            "Duration": entry.duration
+        })
+
     return jsonify(code=200,
                    data={
-                       "login": "xXvasyaXx",
-                       "certificates_count": 123,
-                       "schedule": [
-                           {
-                               "DateTime": "13:00 25.12.2019",
-                               "Cost": 1,
-                               "Duration": "01:00"
-                           }
-                       ]
+                       "login": member.login,
+                       "certificates_count": schedule_entries.count(),
+                       "schedule": schedule_array
                    })
 
 
@@ -154,13 +173,7 @@ def schedule_add():
     duration = schedule["Duration"]
     duration = datetime.datetime.strptime(duration, "%H:%M")
 
-    se = ScheduleEntry()
-
-    se.owner_id = member.id
-    se.date = dt
-    se.duration = duration
-    se.price = cost
-    se.name = name
+    se = ScheduleEntry(member.id, dt, duration, cost, name)
 
     db.session.add(se)
 
@@ -198,15 +211,6 @@ def add_member():
     return "ok"
 
 
-@app.route('/test1')
-def hello_world():
-    member = Member("test", "123")
-    # member.password_hash = "123"
-    db.session.add(member)
-    db.session.commit()
-    return "okokoko"
-
-
 if __name__ == '__main__':
     print("LOL")
     app.run()
@@ -231,8 +235,31 @@ def logout():
     return jsonify(code=200)
 
 
-@app.route("/{login}/schedule/{s_id}/buy", methods=["POST"])
-def login_schedule_buy(login: str, s_id: int):
+def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry):
+    certs = list(db.session.query(Certificate).filter_by(owner_id=buyer.id).all())
+
+    if not (schedule.buyer_id is None):
+        return "Already bought"
+
+    trans_time = datetime.datetime.now()
+
+    if len(certs) < schedule.price:
+        return "Not enough certificates"
+
+    for i in range(schedule.price):
+        certs[i].owner_id = seller.id
+        trns = Transaction(certs[i].id, seller.id, buyer.id, trans_time)
+        db.session.add(trns)
+
+    schedule.buyer_id = buyer.id
+
+    db.session.commit()
+
+    return True
+
+
+@app.route("/<_login>/schedule/<s_id>/buy", methods=["POST"])
+def login_schedule_buy(_login: str, s_id: int):
     json = request.get_json()
     if not json:
         return abort(400)
@@ -245,16 +272,51 @@ def login_schedule_buy(login: str, s_id: int):
     if not session:
         return jsonify(code=403, description="Bad credentials")
 
-    schedule = db.session.query(ScheduleEntry).filter_by(id=s_id)
+    schedule = db.session.query(ScheduleEntry).filter_by(id=s_id).first()
     buyer = db.session.query(Member).filter_by(session=session).first()
-    seller = db.session.query(Member).filter_by(login=login).first()
-    certs = db.session.query(Certificate).filter_by(owner_id=buyer.id)
+    seller = db.session.query(Member).filter_by(login=_login).first()
 
-    if schedule.price > certs.count():
-        return jsonify(code=100, description="Not enough certificates")
+    ret = invoke_user_buy_event(buyer, seller, schedule)
+    if ret != 1:
+        return jsonify(code=100, description=ret)
 
-    for i in range(schedule.price):
-        certs[i].owner_id = seller.id
-
-    db.session.commit()
     return jsonify(code=200)
+
+
+@app.route("/transactions", methods=["POST", "GET"])
+def transactions():
+    json = request.get_json()
+    if not json:
+        return abort(400)
+
+    token = json["token"]
+    if not token:
+        return abort(400)
+
+    member = get_member(token)
+    if not member:
+        return abort(400)
+
+    trns_buy = db.session.query(Transaction.date_time, func.count(Transaction.date_time)).filter_by(
+        from_id=member.id).group_by(Transaction.date_time).all()
+    trns_sell = db.session.query(Transaction.date_time, func.count(Transaction.date_time)).filter_by(
+        to_id=member.id).group_by(Transaction.date_time).all()
+
+    data = {
+        "Buy": [
+            {
+                "Amount": i["0"],
+                "Date": i["date_time"]
+            }
+            for i in trns_buy
+        ],
+        "Sell": [
+            {
+                "Amount": i[1],
+                "Date": i[0]
+            }
+            for i in trns_sell
+        ]
+    }
+
+    return jsonify(code=200, data=data)
