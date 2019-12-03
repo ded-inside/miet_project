@@ -64,7 +64,7 @@ class ScheduleEntry(db.Model):
 
     about = db.Column(db.Text)
 
-    def __init__(self,owner_id,date,duration,price,name):
+    def __init__(self, owner_id, date, duration, price, name):
         self.owner_id = owner_id
         self.date = date
         self.duration = duration

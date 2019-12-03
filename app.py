@@ -51,11 +51,9 @@ def login():
     if member.password_hash != calc_hash(pswd):
         return abort(400)
 
-    sess = Session()
+    sess = Session(calc_token(member.login + "secret_token"), datetime.datetime(year=2019, month=12, day=30))
     member.session = sess
     member.session_id = sess.id
-
-    sess.token = calc_token(member.login + "secret_token")
 
     db.session.add(sess)
 
@@ -141,13 +139,7 @@ def schedule_add():
     duration = schedule["Duration"]
     duration = datetime.datetime.strptime(duration, "%H:%M")
 
-    se = ScheduleEntry()
-
-    se.owner_id = member.id
-    se.date = dt
-    se.duration = duration
-    se.price = cost
-    se.name = name
+    se = ScheduleEntry(member.id, dt, duration, cost, name)
 
     db.session.add(se)
 
@@ -212,17 +204,20 @@ def logout():
 def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry):
     certs = list(db.session.query(Certificate).filter_by(owner_id=buyer.id).all())
 
+    if schedule.owner_id is not None:
+        return "Already bought"
+
     transaction_list = []
     trans_time = datetime.datetime.now()
+
+    if len(certs) < schedule.price:
+        return "Not enough certificates"
 
     for i in range(schedule.price):
         certs[i].owner_id = seller.id
 
-        trns = Transaction()
-        trns.from_id = buyer.id
-        trns.to_id = buyer.id
-        trns.cert_id = certs[i].id
-        trns.date_time = trans_time
+        trns = Transaction(certs[i].id, seller.id, buyer.id, trans_time)
+
         transaction_list.append(trns)
 
     for trns in transaction_list:
@@ -231,6 +226,9 @@ def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry
     schedule.buyer_id = buyer.id
 
     db.session.commit()
+
+    return True
+
 
 @app.route("/<_login>/schedule/<s_id>/buy", methods=["POST"])
 def login_schedule_buy(_login: str, s_id: int):
@@ -249,10 +247,9 @@ def login_schedule_buy(_login: str, s_id: int):
     schedule = db.session.query(ScheduleEntry).filter_by(id=s_id).first()
     buyer = db.session.query(Member).filter_by(session=session).first()
     seller = db.session.query(Member).filter_by(login=_login).first()
-    certs = db.session.query(Certificate).filter_by(owner_id=buyer.id)
 
-    if schedule.price > certs.count():
-        return jsonify(code=100, description="Not enough certificates")
+    ret = invoke_user_buy_event(buyer, seller, schedule)
+    if ret != 1:
+        return jsonify(code=100, description=ret)
 
-    invoke_user_buy_event(buyer, seller, schedule)
     return jsonify(code=200)

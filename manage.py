@@ -72,6 +72,27 @@ def TestBuy():
     assert db.session.query(ScheduleEntry).filter_by(owner_id=seller.id).first().buyer_id == buyer_id
 
 
+def TestDoubleBuy():
+    PreTest()
+
+    event_id = 1
+    buyer_id = 1
+    seller_id = 2
+
+    schedule = db.session.query(ScheduleEntry).filter_by(id=event_id).first()
+    buyer = db.session.query(Member).filter_by(id=buyer_id).first()
+    seller = db.session.query(Member).filter_by(id=seller_id).first()
+
+
+    assert db.session.query(Certificate).filter_by(owner_id=buyer.id).count() == 100
+    assert db.session.query(ScheduleEntry).filter_by(owner_id=seller.id).first().buyer_id is None
+
+    invoke_user_buy_event(buyer, seller, schedule)
+
+    assert db.session.query(Certificate).filter_by(owner_id=buyer.id).count() == 60
+    assert db.session.query(ScheduleEntry).filter_by(owner_id=seller.id).first().buyer_id == buyer_id
+
+
 
 class TestsCommand(Command):
     def run(self):
