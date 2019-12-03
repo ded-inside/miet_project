@@ -1,6 +1,8 @@
+import json
 import os
 import unittest
 
+from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 from app import app, calc_hash
@@ -10,6 +12,34 @@ TEST_DB = 'app.db'
 
 
 class BasicTests(unittest.TestCase):
+
+    ########################
+    #### helper methods ####
+    ########################
+
+    def register(self, login, password):
+        return self.app.post("/register",
+                             data=json.dumps(dict(login=login, password=password)),
+                             content_type='application/json'
+                             )
+
+    def login(self, login, password):
+        return self.app.post("/login",
+                             data=json.dumps(dict(login=login, password=password)),
+                             content_type='application/json'
+                             )
+
+    def logout(self, token):
+        return self.app.post("/login",
+                             data=json.dumps(dict(token=token, )),
+                             content_type='application/json'
+                             )
+
+    def assertCodeEqual(self, response, code):
+        _json = response.get_json()
+        self.assertIsNotNone(_json)
+        self.assertIn("code", _json)
+        self.assertEqual(_json["code"], code)
 
     ############################
     #### setup and teardown ####
@@ -63,6 +93,42 @@ class BasicTests(unittest.TestCase):
     def test_main_page(self):
         response = self.app.get('/', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
+
+    def test_login(self):
+        response = self.login("Alice", "Alice_password")
+        _json = response.get_json()
+        self.assertIsNotNone(_json)
+        self.assertIn("token", _json)
+        self.assertEqual(response.status_code, 200)
+
+    def test_login_incorrect(self):
+        response = self.login("Alice", "Bad_password")
+        self.assertEqual(response.status_code, 400)
+
+    def test_register_new_user(self):
+        response = self.register("NewUser", "NewUser_password")
+        self.assertEqual(response.status_code, 200)
+
+    def test_register_new_user_with_existing_name(self):
+        response = self.register("Alice", "NewUser_password")
+        self.assertCodeEqual(response, 409)
+
+    def test_add_new_event(self):
+        response = self.login("Alice", "Alice_password")
+        _json = response.get_json()
+        token = _json["token"]
+        response = self.app.post("/schedule/add",
+                                 data=json.dumps(dict(token=token, schedule=[
+                                     {
+                                         "DateTime": '25/12/19 00:00',
+                                         "Cost": 123,
+                                         "Duration": "01:00",
+                                         "Name": "XMAS event"
+                                     }
+                                 ])),
+                                 content_type='application/json'
+                                 )
+        self.assertCodeEqual(response, 200)
 
 
 if __name__ == "__main__":
