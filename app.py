@@ -204,10 +204,9 @@ def logout():
 def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry):
     certs = list(db.session.query(Certificate).filter_by(owner_id=buyer.id).all())
 
-    if schedule.owner_id is not None:
+    if not (schedule.buyer_id is None):
         return "Already bought"
 
-    transaction_list = []
     trans_time = datetime.datetime.now()
 
     if len(certs) < schedule.price:
@@ -215,12 +214,7 @@ def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry
 
     for i in range(schedule.price):
         certs[i].owner_id = seller.id
-
         trns = Transaction(certs[i].id, seller.id, buyer.id, trans_time)
-
-        transaction_list.append(trns)
-
-    for trns in transaction_list:
         db.session.add(trns)
 
     schedule.buyer_id = buyer.id
