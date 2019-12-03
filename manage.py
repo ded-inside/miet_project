@@ -29,9 +29,11 @@ class DemoStateCommand(Command):
         db.session.commit()
 
         man_with_certs = Member("Alice", calc_hash("Alice_password"))
+        man_with_certs.about = "Hello, my name is Alice! I have many certificates!"
         db.session.add(man_with_certs)
 
         man_with_event = Member("Bob", calc_hash("Bob_password"))
+        man_with_event.about = "Hello! My name is Bob and I have Xmas event soon"
         db.session.add(man_with_event)
 
         db.session.commit()
