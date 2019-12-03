@@ -38,13 +38,13 @@ def calc_token(data: str):
 
 @app.route("/", methods=['GET'])
 def index():
-    return render_template('index.html')
+    return render_template('index.html', current='index')
 
 
 @app.route("/login", methods=['POST', 'GET'])
 def login():
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('login.html', current='login')
 
     json = request.get_json()
     if not json:

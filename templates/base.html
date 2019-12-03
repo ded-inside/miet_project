@@ -24,11 +24,11 @@
 			</button>
 			<div class="collapse navbar-collapse" id="navbarResponsive">
 				<ul class="navbar-nav ml-auto">
-                    {{ macro.nav_item('Home', url_for('index'), True) }}
-                    {{ macro.nav_item('About', '#') }}
-                    {{ macro.nav_item('Services', '#') }}
-                    {{ macro.nav_item('Contact', '#') }}
-                    {{ macro.nav_item('Login', url_for('login')) }}
+                    {{ macro.nav_item('Home', url_for('index'), current == 'index') }}
+                    {{ macro.nav_item('About', '#', current == 'about') }}
+                    {{ macro.nav_item('Services', '#', current == 'services') }}
+                    {{ macro.nav_item('Contact', '#', current == 'contact') }}
+                    {{ macro.nav_item('Login', url_for('login'), current == 'login') }}
 				</ul>
 			</div>
 		</div>
