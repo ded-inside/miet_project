@@ -71,22 +71,42 @@ def certificates_send():
 
 @app.route("/<_login>")
 def _login(_login: str):
-    return jsonify(code=200, data={"login": "Member2", "about": "doing stuff for money"})
+    if not _login:
+        return abort(400)
+
+    member = db.session.query(Member).filter_by(login=_login).first()
+    if not member:
+        return abort(400)
+
+    return jsonify(200, data={"login": member.login, "about": member.about})
 
 
 @app.route("/<_login>/schedule", methods=["GET"])
 def _login_schedule(_login: str):
+    if not _login:
+        return abort(400)
+
+    member = db.session.query(Member).filter_by(login=_login).first()
+    if not member:
+        return abort(400)
+
+    schedule_entries = db.session.query(ScheduleEntry).filter_by(id=member.id).all()
+    if not schedule_entries:
+        return abort(400)
+
+    schedule_array = []
+    for entry in schedule_entries:
+        schedule_array.append({
+            "DateTime": entry.date_time,
+            "Cost": entry.price,
+            "Duration": entry.duration
+        })
+
     return jsonify(code=200,
                    data={
-                       "login": "xXvasyaXx",
-                       "certificates_count": 123,
-                       "schedule": [
-                           {
-                               "DateTime": "13:00 25.12.2019",
-                               "Cost": 1,
-                               "Duration": "01:00"
-                           }
-                       ]
+                       "login": member.login,
+                       "certificates_count": schedule_entries.count(),
+                       "schedule": schedule_array
                    })
 
 
