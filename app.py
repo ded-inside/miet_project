@@ -165,15 +165,6 @@ def add_member():
     return "ok"
 
 
-@app.route('/test1')
-def hello_world():
-    member = Member("test", "123")
-    # member.password_hash = "123"
-    db.session.add(member)
-    db.session.commit()
-    return "okokoko"
-
-
 if __name__ == '__main__':
     print("LOL")
     app.run()
