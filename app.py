@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, abort
 from flask import request
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
+
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -247,3 +249,42 @@ def login_schedule_buy(_login: str, s_id: int):
         return jsonify(code=100, description=ret)
 
     return jsonify(code=200)
+
+
+@app.route("/transactions", methods=["POST", "GET"])
+def transactions():
+    json = request.get_json()
+    if not json:
+        return abort(400)
+
+    token = json["token"]
+    if not token:
+        return abort(400)
+
+    member = get_member(token)
+    if not member:
+        return abort(400)
+
+    trns_buy = db.session.query(Transaction.date_time, func.count(Transaction.date_time)).filter_by(
+        from_id=member.id).group_by(Transaction.date_time).all()
+    trns_sell = db.session.query(Transaction.date_time, func.count(Transaction.date_time)).filter_by(
+        to_id=member.id).group_by(Transaction.date_time).all()
+
+    data = {
+        "Buy": [
+            {
+                "Amount": i["0"],
+                "Date": i["date_time"]
+            }
+            for i in trns_buy
+        ],
+        "Sell": [
+            {
+                "Amount": i[1],
+                "Date": i[0]
+            }
+            for i in trns_sell
+        ]
+    }
+
+    return jsonify(code=200, data=data)
