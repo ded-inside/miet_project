@@ -16,6 +16,15 @@ from models import *
 db.create_all()
 
 
+def get_member_data(mem: Member):
+    certs_count = db.session.query(Certificate).filter_by(owner_id=mem.id).count()
+    return jsonify(
+        login=mem.login,
+        about=mem.about,
+        certificates=certs_count
+    )
+
+
 def get_member(token: str):
     sess = db.session.query(Session).filter_by(token=token).first()
     if not sess:
@@ -78,7 +87,7 @@ def _login(_login: str):
     if not member:
         return abort(400)
 
-    return jsonify(200, data={"login": member.login, "about": member.about})
+    return jsonify(code=200, data={"login": member.login, "about": member.about})
 
 
 @app.route("/<_login>/schedule", methods=["GET"])
@@ -90,24 +99,23 @@ def _login_schedule(_login: str):
     if not member:
         return abort(400)
 
-    schedule_entries = db.session.query(ScheduleEntry).filter_by(id=member.id).all()
-    if not schedule_entries:
-        return abort(400)
+    schedule_entries = db.session.query(ScheduleEntry).filter_by(owner_id=member.id).all()
 
     schedule_array = []
     for entry in schedule_entries:
         schedule_array.append({
-            "DateTime": entry.date_time,
+            "DateTime": entry.date,
             "Cost": entry.price,
             "Duration": entry.duration
         })
 
-    return jsonify(code=200,
-                   data={
-                       "login": member.login,
-                       "certificates_count": schedule_entries.count(),
-                       "schedule": schedule_array
-                   })
+    return jsonify(
+        code=200,
+        data={
+            "login": member.login,
+            "schedule": schedule_array
+        }
+    )
 
 
 @app.route("/<_login>/schedule/buy")
@@ -273,8 +281,8 @@ def transactions():
     data = {
         "Buy": [
             {
-                "Amount": i["0"],
-                "Date": i["date_time"]
+                "Amount": i[1],
+                "Date": i[0]
             }
             for i in trns_buy
         ],
