@@ -14,6 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 db = SQLAlchemy(app)
 from models import *
 
+
 db.create_all()
 
 
@@ -36,43 +37,43 @@ def calc_token(data: str):
 
 
 @app.route("/", methods=['GET'])
-def main_page():
+def index():
     return render_template('index.html')
 
 
-@app.route("/login", methods=['GET', 'POST'])
+@app.route("/login", methods=['POST', 'GET'])
 def login():
-    if request.method == 'POST':
-        json = request.get_json()
-        if not json:
-            return abort(400)
-
-        login = json["login"]
-        pswd = json["password"]
-
-        if not(login and pswd):
-            return abort(400)
-
-        member = db.session.query(Member).filter_by(login=login).first()
-        if not member:
-            return abort(400)
-
-        if member.password_hash != calc_hash(pswd):
-            return abort(400)
-
-        sess = Session()
-        member.session = sess
-        member.session_id = sess.id
-
-        sess.token = calc_token(member.login+"secret_token")
-
-        db.session.add(sess)
-
-        db.session.commit()
-
-        return jsonify(code=200, token=sess.token)
-    else:
+    if request.method == 'GET':
         return render_template('login.html')
+
+    json = request.get_json()
+    if not json:
+        return abort(400)
+
+    login = json["login"]
+    pswd = json["password"]
+
+    if not (login and pswd):
+        return abort(400)
+
+    member = db.session.query(Member).filter_by(login=login).first()
+    if not member:
+        return abort(400)
+
+    if member.password_hash != calc_hash(pswd):
+        return abort(400)
+
+    sess = Session()
+    member.session = sess
+    member.session_id = sess.id
+
+    sess.token = calc_token(member.login + "secret_token")
+
+    db.session.add(sess)
+
+    db.session.commit()
+
+    return jsonify(code=200, token=sess.token)
 
 
 @app.route("/certificates/send")
@@ -99,15 +100,6 @@ def _login_schedule(_login: str):
                            }
                        ]
                    })
-
-# app.config['DEBUG'] = True
-# app.debug = True
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:password@postgres:5432/postgres'
-
-# db = SQLAlchemy(app)
-
-# from models import *
-# db.create_all()
 
 
 @app.route("/<_login>/schedule/buy")
@@ -139,7 +131,7 @@ def schedule_add():
     cost = int(schedule["Cost"])
     # "Duration": "01:00",
     duration = schedule["Duration"]
-    duration = datetime.datetime.strptime(duration,"%H:%M")
+    duration = datetime.datetime.strptime(duration, "%H:%M")
 
     se = ScheduleEntry()
 
@@ -153,22 +145,11 @@ def schedule_add():
 
     db.session.commit()
 
-
     return jsonify(code=200)
 
 
 @app.route("/schedule/set")
 def schedule_set():
-    pass
-
-
-@app.route("/logout")
-def logout():
-    pass
-
-
-@app.route("/data/load")
-def data_load():
     pass
 
 
@@ -205,12 +186,54 @@ def hello_world():
     return "okokoko"
 
 
-@app.route("/test2")
-def test():
-
-    return "ok"
-
-
 if __name__ == '__main__':
     print("LOL")
     app.run()
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    json = request.get_json()
+    if not json:
+        return abort(400)
+
+    token = json["token"]
+    if not token:
+        return abort(400)
+
+    session = db.session.query(Session).filter_by(token=token).first()
+    if not session:
+        return jsonify(code=403, description="Bad credentials")
+    db.session.delete(session)
+    db.session.commit()
+
+    return jsonify(code=200)
+
+
+@app.route("/{login}/schedule/{s_id}/buy", methods=["POST"])
+def login_schedule_buy(login: str, s_id: int):
+    json = request.get_json()
+    if not json:
+        return abort(400)
+
+    token = json["token"]
+    if not token:
+        return abort(400)
+
+    session = db.session.query(Session).filter_by(token=token).first()
+    if not session:
+        return jsonify(code=403, description="Bad credentials")
+
+    schedule = db.session.query(ScheduleEntry).filter_by(id=s_id)
+    buyer = db.session.query(Member).filter_by(session=session).first()
+    seller = db.session.query(Member).filter_by(login=login).first()
+    certs = db.session.query(Certificate).filter_by(owner_id=buyer.id)
+
+    if schedule.price > certs.count():
+        return jsonify(code=100, description="Not enough certificates")
+
+    for i in range(schedule.price):
+        certs[i].owner_id = seller.id
+
+    db.session.commit()
+    return jsonify(code=200)
