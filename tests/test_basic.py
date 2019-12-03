@@ -1,10 +1,12 @@
 import os
 import unittest
 
+from flask_sqlalchemy import SQLAlchemy
+
 from app import app, calc_hash
 from models import *
 
-TEST_DB = 'test.db'
+TEST_DB = 'app.db'
 
 
 class BasicTests(unittest.TestCase):
@@ -20,6 +22,7 @@ class BasicTests(unittest.TestCase):
         app.config['DEBUG'] = False
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + TEST_DB
 
+        db = SQLAlchemy(app)
         self.app = app.test_client()
 
         self.assertEqual(app.debug, False)
