@@ -38,7 +38,28 @@ def calc_token(data: str):
 
 @app.route("/", methods=['GET'])
 def index():
-    return render_template('index.html', current='index')
+    cards = [{
+        'name': 'Danny 1',
+        'image_url': 'https://i.ytimg.com/vi/5EWp3vq5jlU/maxresdefault.jpg',
+        'description': 'Cool guy'
+    }, {
+        'name': 'Danny 2',
+        'image_url': 'https://avatars.mds.yandex.net/get-zen_doc/125920/pub_5d85ee7fd5bbc300add0a4fc_5d85eead74f1bc00ad2cb1c5/scale_1200',
+        'description': 'Nice man!'
+    }, {
+        'name': 'Danny 3',
+        'image_url': 'https://memepedia.ru/wp-content/uploads/2019/10/denni-de-vito-mem.png',
+        'description': 'Ахахаха)'
+    }, {
+        'name': 'Danny 4',
+        'image_url': 'https://img01.rl0.ru/afisha/1500x-/daily.afisha.ru/uploads/images/2/7f/27f7e31c0faf2dcd0c666849ba15e919.jpg',
+        'description': 'Marry me!'
+    }, {
+        'name': 'Danny 5',
+        'image_url': 'https://medialeaks.ru/wp-content/uploads/2019/05/yeah.jpg',
+        'description': 'Рассо... Раса... Рамас... Рассол попил крч)0))'
+    }]
+    return render_template('index.html', current='index', cards=cards)
 
 
 @app.route("/login", methods=['POST', 'GET'])
