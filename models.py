@@ -6,100 +6,82 @@ from app import db
 
 Base = declarative_base()
 
-cross_table = db.Table('user_chat', db.metadata,
-                       db.Column('user_id', db.Integer, db.ForeignKey("users.id")),
-                       db.Column('chat_id', db.Integer, db.ForeignKey('chats.id'))
-                       )
-
 
 class Session(db.Model):
     __tablename__ = "sessions"
 
     id = db.Column(db.Integer, primary_key=True)
 
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    user = relationship("User", uselist=False, back_populates="session")
+    user = relationship("Member", uselist=False, back_populates="session")
+
+    token = db.Column(db.String)
+
+    expires_at = db.Column(db.DateTime, default=datetime.datetime.now()+datetime.timedelta(hours=1))
 
 
-class User(db.Model):
-    __tablename__ = "users"
+class Member(db.Model):
+    __tablename__ = "members"
 
     id = db.Column(db.Integer, primary_key=True)
 
-    login = db.Column(db.String)
-    password_hash = db.Column(db.String)
+    login = db.Column(db.String, nullable=False)
+    password_hash = db.Column(db.String, nullable=False)
 
-    session_id = db.Column(db.Integer, db.ForeignKey("session.id"))
-    session = relationship("Session", uselist=False, back_populates="user")
+    session_id = db.Column(db.Integer, db.ForeignKey("sessions.id"), nullable=True)
+    session = relationship("Session", back_populates="user")
 
-    def __init__(self, username):
-        self.username = username
+    # certificates = relationship("Certificate", back_populates="owner")
 
+    # entries = relationship("ScheduleEntry", back_populates="owner")
 
-class Admin(User):
-    pass
+    about = db.Column(db.String, default="")
 
-
-class Member(User):
-    pass
-
-
-class Schedule(db.Model):
-    pass
+    def __init__(self, login, password_hash):
+        self.login = login
+        self.password_hash = password_hash
 
 
 class ScheduleEntry(db.Model):
-    pass
+    __tablename__ = "schedule_entries"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    owner_id = db.Column(db.Integer, db.ForeignKey("members.id"))
+    # owner = relationship("Member", back_populates="entries")
+
+    date = db.Column(db.DateTime, nullable=False)
+    duration = db.Column(db.DateTime)
+
+    buyer_id = db.Column(db.Integer, db.ForeignKey("members.id"), nullable=True)
+
+    price = db.Column(db.Integer)
+
+    name = db.Column(db.String)
 
 
 class Transaction(db.Model):
-    pass
+    __tablename__ = "transactions"
 
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-class Club(db.Model):
-    pass
+    cert_id = db.column(db.Integer, db.ForeignKey("certificates.id"))
+
+    from_id = db.Column(db.Integer, db.ForeignKey("members.id"))
+
+    to_id = db.Column(db.Integer, db.ForeignKey("members.id"))
+
 
 
 class Certificate(db.Model):
-    pass
+    __tablename__ = "certificates"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    owner_id = db.Column(db.Integer, db.ForeignKey("members.id"))
+    # owner = relationship("Member", back_populates="certificates")
 
 
 class Log(db.Model):
-    pass
+    __tablename__ = "logs"
 
-# class Chat(db.Model):
-#     __tablename__ = "chats"
-#
-#     id = db.Column(db.Integer, primary_key=True)
-#
-#     name = db.Column(db.String)
-#
-#     users = relationship("User",
-#                          secondary=cross_table,
-#                          back_populates="chats")
-#
-#     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-#
-#     messages = relationship("Message", back_populates="chat")
-#
-#     def __init__(self, name):
-#         self.name = name
-#
-#
-# class Message(db.Model):
-#     __tablename__ = "messages"
-#
-#     id = db.Column(db.Integer, primary_key=True)
-#
-#     chat = relationship("Chat", back_populates="messages")
-#     chat_id = db.Column(db.Integer, db.ForeignKey('chats.id'))
-#
-#     author = relationship("User", back_populates="messages")
-#     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-#
-#     text = db.Column(db.Text)
-#
-#     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-#
-#     def __init__(self, text):
-#         self.text = text
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)

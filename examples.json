@@ -1,0 +1,225 @@
+{
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/add/user" ,
+      "request": {
+        "login": "xXvasyaXx" ,
+        "password": "my_secret_password"
+      },
+
+      "responses": [
+        {
+          "code": "200",
+          "token": "some_token"
+        },
+        {
+          "code": "409",
+          "description": "Same login is already exists"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/login" ,
+      "request": {
+        "login": "xXvasyaXx" ,
+        "password": "my_secret_password"
+      },
+      "responses":[
+        {
+          "code": "200",
+          "token": "some_token"
+        },
+        {
+          "code": "403",
+          "description": "Bad credentials"
+        },
+        {
+          "code": "404",
+          "description": "no user with such name"
+        }
+
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "certificates/send" ,
+      "request": {
+        "token": "some_token",
+        "to_user": "xXvasyaXx",
+        "amount": 123
+      },
+      "responses":[
+        {
+          "code": "200"
+        },
+        {
+          "code": "404",
+          "description": "No such user"
+        },
+        {
+          "code": "hz",
+          "description": "Not enough certificates"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/{login}/schedule/buy",
+      "request": {
+        "token": "some_token",
+        "schedule_id": 123
+      },
+      "responses":[
+        {
+          "code": "200"
+        },
+        {
+          "code": "hz",
+          "description": "Not enough certificates"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/logout",
+      "request": {
+        "token": "some_token"
+      },
+      "responses":[
+        {
+          "code": "200"
+        },
+        {
+          "code": "403",
+          "description": "Bad credentials"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/data/load",
+      "request": {
+        "token": "some_token"
+      },
+      "responses":[
+        {
+          "code": "200",
+          "data": {
+            "login": "xXvasyaXx",
+            "certificate_balance": 123
+          }
+        },
+        {
+          "code": "403",
+          "description": "Bad credentials"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/{login}",
+      "request": {
+        "token": "some_token"
+      },
+      "responses":[
+        {
+          "code": "200",
+          "data": {
+            "login": "xXvasyaXx",
+            "about": "doing stuff for money"
+          }
+        },
+        {
+          "code": "403",
+          "description": "Bad credentials"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/{login}/schedule",
+      "request": {
+        "token": "some_token"
+      },
+      "responses":[
+        {
+          "code": "200",
+          "data": {
+            "login": "xXvasyaXx",
+            "certificates_count": 123,
+            "schedule": [
+              {
+                "DateTime": "13:00 Kogda-nibud",
+                "Cost": 123,
+                "Duration": "01:00"
+              }
+            ]
+          }
+        },
+        {
+          "code": "403",
+          "description": "Bad credentials"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/schedule/add",
+      "request": {
+        "token": "Alicesecret_token",
+        "schedule": [
+              {
+                "DateTime": "Sun, 24 Nov 2019 22:59:44 GMT",
+                "Cost": 123,
+                "Duration": "01:00",
+                "Name": "XMAS event"
+              }
+            ]
+      },
+      "responses":[
+        {
+          "code": "200"
+        },
+        {
+          "code": "409",
+          "description": "Overlaps with existing"
+        },
+        {
+          "code": "400",
+          "description": "Bad something"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/schedule/set",
+      "request": {
+        "token": "some_token",
+        "schedule_id": 111,
+        "schedule": [
+              {
+                "DateTime": "13:00 Kogda-nibud",
+                "Cost": 123,
+                "Duration": "01:00"
+              }
+            ]
+      },
+      "responses":[
+        {
+          "code": "200"
+        },
+        {
+          "code": "409",
+          "description": "Overlaps with existing"
+        },
+        {
+          "code": "400",
+          "description": "Bad something"
+        }
+      ]
+    }
+
+  ]
+}
