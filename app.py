@@ -1,8 +1,6 @@
 from flask import Flask, jsonify, abort
-from flask_sqlalchemy import SQLAlchemy
 from flask import request
-import datetime
-
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -43,7 +41,7 @@ def login():
     login = json["login"]
     pswd = json["password"]
 
-    if not(login and pswd):
+    if not (login and pswd):
         return abort(400)
 
     member = db.session.query(Member).filter_by(login=login).first()
@@ -57,7 +55,7 @@ def login():
     member.session = sess
     member.session_id = sess.id
 
-    sess.token = calc_token(member.login+"secret_token")
+    sess.token = calc_token(member.login + "secret_token")
 
     db.session.add(sess)
 
@@ -121,7 +119,7 @@ def schedule_add():
     cost = int(schedule["Cost"])
     # "Duration": "01:00",
     duration = schedule["Duration"]
-    duration = datetime.datetime.strptime(duration,"%H:%M")
+    duration = datetime.datetime.strptime(duration, "%H:%M")
 
     se = ScheduleEntry()
 
@@ -135,22 +133,11 @@ def schedule_add():
 
     db.session.commit()
 
-
     return jsonify(code=200)
 
 
 @app.route("/schedule/set")
 def schedule_set():
-    pass
-
-
-@app.route("/logout")
-def logout():
-    pass
-
-
-@app.route("/data/load")
-def data_load():
     pass
 
 
@@ -187,18 +174,9 @@ def hello_world():
     return "okokoko"
 
 
-@app.route("/test2")
-def test():
-
-    return "ok"
-
-
 if __name__ == '__main__':
     print("LOL")
     app.run()
-@app.route('/login')
-def login():
-    return 'login'
 
 
 @app.route("/logout", methods=["POST"])
@@ -247,12 +225,3 @@ def login_schedule_buy(login: str, s_id: int):
 
     db.session.commit()
     return jsonify(code=200)
-
-
-
-
-
-
-
-
-
