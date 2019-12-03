@@ -194,8 +194,8 @@ def schedule_set():
     pass
 
 
-@app.route("/add/user", methods=['POST'])
-def add_member():
+@app.route("/register", methods=['POST'])
+def register():
     json = request.get_json()
     if not json:
         return abort(400)
@@ -210,12 +210,12 @@ def add_member():
 
     member = db.session.query(Member).filter_by(login=login).first()
     if member is not None:
-        return "login is already taken"
+        return jsonify(code=409, description="login is already taken")
 
     member = Member(login, password_hash)
     db.session.add(member)
     db.session.commit()
-    return "ok"
+    return jsonify(code=200)
 
 
 if __name__ == '__main__':
