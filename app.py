@@ -281,8 +281,8 @@ def transactions():
     data = {
         "Buy": [
             {
-                "Amount": i["0"],
-                "Date": i["date_time"]
+                "Amount": i[1],
+                "Date": i[0]
             }
             for i in trns_buy
         ],
