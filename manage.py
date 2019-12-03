@@ -34,17 +34,11 @@ def PreTest():
     db.session.commit()
 
     for _ in range(100):
-        cert = Certificate()
-        # cert.owner = man_with_certs
-        cert.owner_id = man_with_certs.id
+        cert = Certificate(man_with_certs.id)
         db.session.add(cert)
 
-    s_entry = ScheduleEntry()
-    s_entry.name = "XMas event"
-    s_entry.date = datetime.date(year=2019, month=12, day=25)
-    s_entry.price = 40
-    # s_entry.owner = man_with_event
-    s_entry.owner_id = man_with_event.id
+    s_entry = ScheduleEntry(man_with_event.id, datetime.date(year=2019, month=12, day=25),
+                            datetime.datetime(year=2019, month=12, day=25, hour=10), 40, "XMas event")
 
     db.session.add(s_entry)
 
@@ -117,4 +111,5 @@ manager.add_command('demostate', DemoStateCommand())
 manager.add_command('test', TestsCommand())
 
 if __name__ == "__main__":
-    manager.run()
+    # manager.run()
+    TestBuy()
