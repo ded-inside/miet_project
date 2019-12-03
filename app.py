@@ -35,36 +35,44 @@ def calc_token(data: str):
     return data
 
 
-@app.route("/login", methods=['POST'])
+@app.route("/", methods=['GET'])
+def main_page():
+    return render_template('index.html')
+
+
+@app.route("/login", methods=['GET', 'POST'])
 def login():
-    json = request.get_json()
-    if not json:
-        return abort(400)
+    if request.method == 'POST':
+        json = request.get_json()
+        if not json:
+            return abort(400)
 
-    login = json["login"]
-    pswd = json["password"]
+        login = json["login"]
+        pswd = json["password"]
 
-    if not(login and pswd):
-        return abort(400)
+        if not(login and pswd):
+            return abort(400)
 
-    member = db.session.query(Member).filter_by(login=login).first()
-    if not member:
-        return abort(400)
+        member = db.session.query(Member).filter_by(login=login).first()
+        if not member:
+            return abort(400)
 
-    if member.password_hash != calc_hash(pswd):
-        return abort(400)
+        if member.password_hash != calc_hash(pswd):
+            return abort(400)
 
-    sess = Session()
-    member.session = sess
-    member.session_id = sess.id
+        sess = Session()
+        member.session = sess
+        member.session_id = sess.id
 
-    sess.token = calc_token(member.login+"secret_token")
+        sess.token = calc_token(member.login+"secret_token")
 
-    db.session.add(sess)
+        db.session.add(sess)
 
-    db.session.commit()
+        db.session.commit()
 
-    return jsonify(code=200, token=sess.token)
+        return jsonify(code=200, token=sess.token)
+    else:
+        return render_template('login.html')
 
 
 @app.route("/certificates/send")
