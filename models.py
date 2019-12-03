@@ -70,6 +70,7 @@ class Transaction(db.Model):
 
     to_id = db.Column(db.Integer, db.ForeignKey("members.id"))
 
+    date_time = db.Column(db.DateTime)
 
 
 class Certificate(db.Model):
