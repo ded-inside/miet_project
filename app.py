@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, abort, render_template
+from flask import Flask, jsonify, abort, render_template, make_response, redirect
 from flask import request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
@@ -17,7 +17,7 @@ from models import *
 db.create_all()
 
 
-def get_event_data(entry: ScheduleEntry):
+def get_event_data(entry):
     owner = db.session.query(Member).filter_by(id=entry.owner_id).first()
     data = {"Owner": owner.login,
             "Id": entry.id,
@@ -30,7 +30,7 @@ def get_event_data(entry: ScheduleEntry):
     return data
 
 
-def get_public_member_data(mem: Member):
+def get_public_member_data(mem):
     events = db.session.query(ScheduleEntry).filter_by(owner_id=mem.id, buyer_id=None).all()
     return dict(
         login=mem.login,
@@ -96,7 +96,7 @@ def login():
     if request.method == 'GET':
         return render_template('login.html', current='login')
 
-    json = request.form
+    json = request.form.to_dict()
 
     if not json:
         return abort(400)
@@ -125,7 +125,10 @@ def login():
 
     db.session.commit()
 
-    return jsonify(code=200, token=sess.token)
+    # return jsonify(code=200, token=sess.token)
+    ret = make_response(redirect('/'))
+    ret.set_cookie('token', sess.token)
+    return ret
 
 
 @app.route("/<_login>")
@@ -137,7 +140,8 @@ def _login(_login: str):
     if not member:
         return abort(400)
 
-    return jsonify(code=200, data={"login": member.login, "about": member.about})
+    # return jsonify(code=200, data={"login": member.login, "about": member.about})
+    return render_template('prof.html', login=_login)
 
 
 @app.route("/<_login>/schedule", methods=["GET"])
@@ -250,7 +254,7 @@ def logout():
     return jsonify(code=200)
 
 
-def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry):
+def invoke_user_buy_event(buyer, seller, schedule):
     certs = list(db.session.query(Certificate).filter_by(owner_id=buyer.id).all())
 
     if not (schedule.buyer_id is None):
@@ -275,20 +279,24 @@ def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry
 
 @app.route("/<_login>/schedule/buy", methods=["POST"])
 def login_schedule_buy(_login: str):
-    json = request.get_json()
+    json = request.form
     if not json:
+        print('sched.buy: null')
         return abort(400)
 
     token = json["token"]
     if not token:
+        print('sched.buy: no token')
         return abort(400)
 
     s_id = json["id"]
     if not s_id:
+        print('sched.buy: no s_id')
         return abort(400)
 
     session = db.session.query(Session).filter_by(token=token).first()
     if not session:
+        print('sched.buy: no session')
         return jsonify(code=403, description="Bad credentials")
 
     schedule = db.session.query(ScheduleEntry).filter_by(id=s_id).first()
