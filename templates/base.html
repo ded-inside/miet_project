@@ -28,7 +28,11 @@
                     {{ macro.nav_item('About', '#', current == 'about') }}
                     {{ macro.nav_item('Services', '#', current == 'services') }}
                     {{ macro.nav_item('Contact', '#', current == 'contact') }}
-                    {{ macro.nav_item('Login', url_for('login'), current == 'login') }}
+                    {% if request.cookies.get('username') %}
+                        {{ macro.nav_item(request.cookies.get('username'), url_for('_login', _login=request.cookies.get('username')), current == 'login') }}
+                    {% else %}
+                        {{ macro.nav_item('Login', url_for('login'), current == 'login') }}
+                    {% endif %}
 				</ul>
 			</div>
 		</div>

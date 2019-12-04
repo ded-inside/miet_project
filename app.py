@@ -128,6 +128,7 @@ def login():
     # return jsonify(code=200, token=sess.token)
     ret = make_response(redirect('/'))
     ret.set_cookie('token', sess.token)
+    ret.set_cookie('username', member.login)
     return ret
 
 
@@ -278,7 +279,7 @@ def invoke_user_buy_event(buyer, seller, schedule):
 
 
 @app.route("/<_login>/schedule/buy", methods=["POST"])
-def login_schedule_buy(_login: str):
+def login_schedule_buy(_login):
     json = request.form
     if not json:
         print('sched.buy: null')
@@ -312,7 +313,7 @@ def login_schedule_buy(_login: str):
 
 @app.route("/transactions", methods=["POST", "GET"])
 def transactions():
-    json = request.get_json()
+    json = request.form
     if not json:
         return abort(400)
 

@@ -34,8 +34,12 @@ class FronendTests(unittest.TestCase):
 
     def loginGetToken(self, login, password):
         response = self.login(login, password)
-        _json = response.get_json()
-        return _json["token"]
+        headers = response.headers
+        print(headers)
+        cookies = headers.get('Set-Cookie').split('; ')
+        token = [string[6:] for string in cookies if string.startswith('token=')]
+        print(token)
+        return token[0]
 
     def logout(self, token):
         return self.app.post("/logout",
@@ -57,8 +61,8 @@ class FronendTests(unittest.TestCase):
 
     def buy_event(self, token, seller, _id):
         return self.app.post(f"/{seller}/schedule/buy",
-                             data=json.dumps(dict(token=token, id=_id)),
-                             content_type='application/json'
+                             data=dict(token=token, id=_id)
+                             # content_type='application/json'
                              )
 
     ############################
@@ -119,7 +123,8 @@ class FronendTests(unittest.TestCase):
         # _json = response.get_json()
         # self.assertIsNotNone(_json)
         # self.assertIn("token", _json)
-        self.assertEqual(response.status_code, 200)
+        # self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)         # mean redirect
 
     def test_login_incorrect(self):
         response = self.login("Alice", "Bad_password")
@@ -150,9 +155,7 @@ class FronendTests(unittest.TestCase):
         self.assertCodeEqual(response, 409)
 
     def test_add_new_event(self):
-        response = self.login("Alice", "Alice_password")
-        _json = response.get_json()
-        token = _json["token"]
+        token = self.loginGetToken("Alice", "Alice_password")
         response = self.app.post("/schedule/add",
                                  data=json.dumps(dict(token=token, schedule=[
                                      {
@@ -164,6 +167,7 @@ class FronendTests(unittest.TestCase):
                                  ])),
                                  content_type='application/json'
                                  )
+        print(response)
         self.assertCodeEqual(response, 200)
         _json = response.get_json()
         self.assertDictEqual(_json["data"], dict(id=2))
@@ -171,8 +175,8 @@ class FronendTests(unittest.TestCase):
     def test_buy_event(self):
         token = self.loginGetToken("Alice", "Alice_password")
         response = self.app.post("/Bob/schedule/buy",
-                                 data=json.dumps(dict(token=token, id=1)),
-                                 content_type='application/json'
+                                 data=dict(token=token, id=1)
+                                 # content_type='application/json'
                                  )
 
         self.assertCodeEqual(response, 200)
@@ -181,8 +185,8 @@ class FronendTests(unittest.TestCase):
         self.register("NewUser", "NewUser_password")
         token = self.loginGetToken("NewUser", "NewUser_password")
         response = self.app.post("/Bob/schedule/buy",
-                                 data=json.dumps(dict(token=token, id=1)),
-                                 content_type='application/json'
+                                 data=dict(token=token, id=1)
+                                 # content_type='application/json'
                                  )
         self.assertCodeEqual(response, 100)
         self.assertDescriptionEqual(response, "Not enough certificates")
@@ -210,12 +214,13 @@ class FronendTests(unittest.TestCase):
         self.buy_event(token, "Bob", 1)
 
         response = self.app.post("/transactions",
-                                 data=json.dumps(dict(token=token)),
-                                 content_type='application/json'
+                                 data=dict(token=token)
+                                 # content_type='application/json'
                                  )
         # todo fix date
         ideal = {'Buy': [], 'Sell': [{'Amount': 40, 'Date': ""}]}
         _json = response.get_json()
+        print('AAAAAAAAAAAAAAAAA     ' + str(_json))
         _json["data"]["Sell"][0]["Date"] = ""
 
         self.assertDictEqual(ideal, _json["data"])
