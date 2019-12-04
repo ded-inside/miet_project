@@ -1,3 +1,6 @@
+import sys
+
+sys.path.extend("..")
 import json
 import os
 import unittest
@@ -6,6 +9,7 @@ from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 from app import app, calc_hash
+
 from models import *
 
 TEST_DB = 'app.db'
@@ -29,6 +33,11 @@ class BasicTests(unittest.TestCase):
                              content_type='application/json'
                              )
 
+    def loginGetToken(self, login, password):
+        response = self.login(login, password)
+        _json = response.get_json()
+        return _json["token"]
+
     def logout(self, token):
         return self.app.post("/login",
                              data=json.dumps(dict(token=token, )),
@@ -40,6 +49,18 @@ class BasicTests(unittest.TestCase):
         self.assertIsNotNone(_json)
         self.assertIn("code", _json)
         self.assertEqual(_json["code"], code)
+
+    def assertDescriptionEqual(self, response, description):
+        _json = response.get_json()
+        self.assertIsNotNone(_json)
+        self.assertIn("description", _json)
+        self.assertEqual(_json["description"], description)
+
+    def buy_event(self, token, seller, _id):
+        return self.app.post(f"/{seller}/schedule/{_id}/buy",
+                             data=json.dumps(dict(token=token)),
+                             content_type='application/json'
+                             )
 
     ############################
     #### setup and teardown ####
@@ -129,6 +150,35 @@ class BasicTests(unittest.TestCase):
                                  content_type='application/json'
                                  )
         self.assertCodeEqual(response, 200)
+
+    def test_buy_event(self):
+        token = self.loginGetToken("Alice", "Alice_password")
+        response = self.app.post("/Bob/schedule/1/buy",
+                                 data=json.dumps(dict(token=token)),
+                                 content_type='application/json'
+                                 )
+
+        self.assertCodeEqual(response, 200)
+
+    def test_buy_event_with_not_enough_certificates(self):
+        self.register("NewUser", "NewUser_password")
+        token = self.loginGetToken("NewUser", "NewUser_password")
+        response = self.app.post("/Bob/schedule/1/buy",
+                                 data=json.dumps(dict(token=token)),
+                                 content_type='application/json'
+                                 )
+        self.assertCodeEqual(response, 100)
+        self.assertDescriptionEqual(response, "Not enough certificates")
+
+    def test_buy_already_bought_event(self):
+        token = self.loginGetToken("Alice", "Alice_password")
+        self.buy_event(token, "Bob", 1)
+
+        response = self.buy_event(token, "Bob", 1)
+
+        self.assertCodeEqual(response, 100)
+        self.assertDescriptionEqual(response, "Already bought")
+
 
 
 if __name__ == "__main__":

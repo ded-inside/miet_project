@@ -262,7 +262,7 @@ def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry
 
     db.session.commit()
 
-    return True
+    return None
 
 
 @app.route("/<_login>/schedule/<s_id>/buy", methods=["POST"])
@@ -284,7 +284,7 @@ def login_schedule_buy(_login: str, s_id: int):
     seller = db.session.query(Member).filter_by(login=_login).first()
 
     ret = invoke_user_buy_event(buyer, seller, schedule)
-    if ret != 1:
+    if ret:
         return jsonify(code=100, description=ret)
 
     return jsonify(code=200)
