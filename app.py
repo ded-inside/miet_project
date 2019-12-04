@@ -130,11 +130,13 @@ def _login_schedule(_login: str):
     schedule_array = []
     for entry in schedule_entries:
         schedule_array.append({
-            "owner": _login,
-            "id": entry.id,
+            "Owner": _login,
+            "Id": entry.id,
             "DateTime": entry.date.strftime("%d/%m/%y %H:%M"),
             "Cost": entry.price,
-            "Duration": entry.duration.strftime("%H:%M")
+            "Duration": entry.duration.strftime("%H:%M"),
+            "Name": entry.name,
+            "About": entry.about
         })
 
     return jsonify(

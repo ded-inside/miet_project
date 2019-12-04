@@ -201,7 +201,8 @@ class FronendTests(unittest.TestCase):
         response = self.app.get('/Bob/schedule', follow_redirects=True)
         self.assertCodeEqual(response, 200)
         ideal = {'login': 'Bob',
-                 'schedule': [{"owner": "Bob", "id": 1, 'Cost': 40, 'DateTime': '25/12/19 00:00', 'Duration': '10:00'}]}
+                 'schedule': [{"Owner": "Bob", "Id": 1, 'Cost': 40, 'DateTime': '25/12/19 00:00', 'Duration': '10:00',
+                               "Name": "XMas event", "About": None}]}
         self.assertDictEqual(response.get_json()["data"], ideal)
 
     def test_transaction(self):
