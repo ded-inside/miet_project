@@ -62,6 +62,11 @@ def calc_token(data: str):
 
 @app.route("/", methods=['GET'])
 def index():
+    data = []
+    members = db.session.query(Member).all()
+    for m in members:
+        data.append(get_public_member_data(m))
+    print(data)
     cards = [{
         'name': 'Danny 1',
         'image_url': 'https://i.ytimg.com/vi/5EWp3vq5jlU/maxresdefault.jpg',
