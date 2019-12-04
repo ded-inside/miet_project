@@ -111,5 +111,4 @@ manager.add_command('demostate', DemoStateCommand())
 manager.add_command('test', TestsCommand())
 
 if __name__ == "__main__":
-    # manager.run()
-    TestBuy()
+    manager.run()

@@ -2,6 +2,7 @@ from flask import Flask, jsonify, abort, render_template
 from flask import request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
+import datetime
 
 
 app = Flask(__name__)
@@ -16,12 +17,28 @@ from models import *
 db.create_all()
 
 
-def get_member_data(mem):
-    certs_count = db.session.query(Certificate).filter_by(owner_id=mem.id).count()
-    return jsonify(
+def get_event_data(entry: ScheduleEntry):
+    owner = db.session.query(Member).filter_by(id=entry.owner_id).first()
+    data = {"Owner": owner.login,
+            "Id": entry.id,
+            "DateTime": entry.date.strftime("%d/%m/%y %H:%M"),
+            "Cost": entry.price,
+            "Duration": entry.duration.strftime("%H:%M"),
+            "Name": entry.name,
+            "About": entry.about
+            }
+    return data
+
+
+def get_public_member_data(mem: Member):
+    events = db.session.query(ScheduleEntry).filter_by(owner_id=mem.id, buyer_id=None).all()
+    return dict(
         login=mem.login,
         about=mem.about,
-        certificates=certs_count
+        events=[
+            get_event_data(e)
+            for e in events
+        ],
     )
 
 
@@ -45,6 +62,11 @@ def calc_token(data: str):
 
 @app.route("/", methods=['GET'])
 def index():
+    data = []
+    members = db.session.query(Member).all()
+    for m in members:
+        data.append(get_public_member_data(m))
+    print(data)
     cards = [{
         'name': 'Danny 1',
         'image_url': 'https://i.ytimg.com/vi/5EWp3vq5jlU/maxresdefault.jpg',
@@ -81,7 +103,7 @@ def login():
 
     login = json["login"]
     pswd = json["password"]
-    remember = json["remember"]     # Null or "on" like false/true
+    # remember = json["remember"]     # Null or "on" like false/true
 
     if not (login and pswd):
         return abort(400)
@@ -96,6 +118,8 @@ def login():
     sess = Session(calc_token(member.login + "secret_token"), datetime.datetime(year=2019, month=12, day=30))
     member.session = sess
     member.session_id = sess.id
+
+    sess.token = calc_token(member.login + "secret_token")
 
     db.session.add(sess)
 
@@ -130,9 +154,13 @@ def _login_schedule(_login: str):
     schedule_array = []
     for entry in schedule_entries:
         schedule_array.append({
+            "Owner": _login,
+            "Id": entry.id,
             "DateTime": entry.date.strftime("%d/%m/%y %H:%M"),
             "Cost": entry.price,
-            "Duration": entry.duration.strftime("%H:%M")
+            "Duration": entry.duration.strftime("%H:%M"),
+            "Name": entry.name,
+            "About": entry.about
         })
 
     return jsonify(
@@ -171,7 +199,7 @@ def schedule_add():
 
     db.session.commit()
 
-    return jsonify(code=200)
+    return jsonify(code=200, data={"id": se.id})
 
 
 @app.route("/register", methods=['POST'])
@@ -222,7 +250,7 @@ def logout():
     return jsonify(code=200)
 
 
-def invoke_user_buy_event(buyer, seller, schedule):
+def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry):
     certs = list(db.session.query(Certificate).filter_by(owner_id=buyer.id).all())
 
     if not (schedule.buyer_id is None):
@@ -245,14 +273,18 @@ def invoke_user_buy_event(buyer, seller, schedule):
     return None
 
 
-@app.route("/<_login>/schedule/<s_id>/buy", methods=["POST"])
-def login_schedule_buy(_login: str, s_id: int):
+@app.route("/<_login>/schedule/buy", methods=["POST"])
+def login_schedule_buy(_login: str):
     json = request.get_json()
     if not json:
         return abort(400)
 
     token = json["token"]
     if not token:
+        return abort(400)
+
+    s_id = json["id"]
+    if not s_id:
         return abort(400)
 
     session = db.session.query(Session).filter_by(token=token).first()

@@ -15,7 +15,7 @@ from models import *
 TEST_DB = 'app.db'
 
 
-class BasicTests(unittest.TestCase):
+class FronendTests(unittest.TestCase):
 
     ########################
     #### helper methods ####
@@ -29,8 +29,7 @@ class BasicTests(unittest.TestCase):
 
     def login(self, login, password):
         return self.app.post("/login",
-                             data=json.dumps(dict(login=login, password=password)),
-                             content_type='application/json'
+                             data=dict(login=login, password=password),
                              )
 
     def loginGetToken(self, login, password):
@@ -39,7 +38,7 @@ class BasicTests(unittest.TestCase):
         return _json["token"]
 
     def logout(self, token):
-        return self.app.post("/login",
+        return self.app.post("/logout",
                              data=json.dumps(dict(token=token, )),
                              content_type='application/json'
                              )
@@ -57,8 +56,8 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(_json["description"], description)
 
     def buy_event(self, token, seller, _id):
-        return self.app.post(f"/{seller}/schedule/{_id}/buy",
-                             data=json.dumps(dict(token=token)),
+        return self.app.post(f"/{seller}/schedule/buy",
+                             data=json.dumps(dict(token=token, id=_id)),
                              content_type='application/json'
                              )
 
@@ -126,6 +125,22 @@ class BasicTests(unittest.TestCase):
         response = self.login("Alice", "Bad_password")
         self.assertEqual(response.status_code, 400)
 
+    def test_logout(self):
+        token = self.loginGetToken("Alice", "Alice_password")
+        response = self.logout(token)
+
+        self.assertCodeEqual(response, 200)
+
+    def test_logout_incorrect_token(self):
+        token = self.loginGetToken("Alice", "Alice_password")
+        response = self.logout("Not" + token)
+
+        self.assertCodeEqual(response, 403)
+        self.assertDescriptionEqual(response, "Bad credentials")
+
+    def test_cant_get_info_after_logout(self):
+        pass
+
     def test_register_new_user(self):
         response = self.register("NewUser", "NewUser_password")
         self.assertEqual(response.status_code, 200)
@@ -150,11 +165,13 @@ class BasicTests(unittest.TestCase):
                                  content_type='application/json'
                                  )
         self.assertCodeEqual(response, 200)
+        _json = response.get_json()
+        self.assertDictEqual(_json["data"], dict(id=2))
 
     def test_buy_event(self):
         token = self.loginGetToken("Alice", "Alice_password")
-        response = self.app.post("/Bob/schedule/1/buy",
-                                 data=json.dumps(dict(token=token)),
+        response = self.app.post("/Bob/schedule/buy",
+                                 data=json.dumps(dict(token=token, id=1)),
                                  content_type='application/json'
                                  )
 
@@ -163,8 +180,8 @@ class BasicTests(unittest.TestCase):
     def test_buy_event_with_not_enough_certificates(self):
         self.register("NewUser", "NewUser_password")
         token = self.loginGetToken("NewUser", "NewUser_password")
-        response = self.app.post("/Bob/schedule/1/buy",
-                                 data=json.dumps(dict(token=token)),
+        response = self.app.post("/Bob/schedule/buy",
+                                 data=json.dumps(dict(token=token, id=1)),
                                  content_type='application/json'
                                  )
         self.assertCodeEqual(response, 100)
@@ -182,9 +199,39 @@ class BasicTests(unittest.TestCase):
     def test_get_schedule(self):
         response = self.app.get('/Bob/schedule', follow_redirects=True)
         self.assertCodeEqual(response, 200)
-        ideal = {'login': 'Bob', 'schedule': [{'Cost': 40, 'DateTime': '25/12/19 00:00', 'Duration': '10:00'}]}
+        ideal = {'login': 'Bob',
+                 'schedule': [{"Owner": "Bob", "Id": 1, 'Cost': 40, 'DateTime': '25/12/19 00:00', 'Duration': '10:00',
+                               "Name": "XMas event", "About": None}]}
         self.assertDictEqual(response.get_json()["data"], ideal)
 
+    def test_transaction(self):
+        token = self.loginGetToken("Alice", "Alice_password")
+
+        self.buy_event(token, "Bob", 1)
+
+        response = self.app.post("/transactions",
+                                 data=json.dumps(dict(token=token)),
+                                 content_type='application/json'
+                                 )
+        # todo fix date
+        ideal = {'Buy': [], 'Sell': [{'Amount': 40, 'Date': ""}]}
+        _json = response.get_json()
+        _json["data"]["Sell"][0]["Date"] = ""
+
+        self.assertDictEqual(ideal, _json["data"])
+
+        token = self.loginGetToken("Bob", "Bob_password")
+
+        ideal = {'Sell': [], 'Buy': [{'Amount': 40, 'Date': ""}]}
+        response = self.app.post("/transactions",
+                                 data=json.dumps(dict(token=token)),
+                                 content_type='application/json'
+                                 )
+
+        _json = response.get_json()
+        _json["data"]["Buy"][0]["Date"] = ""
+
+        self.assertDictEqual(ideal, _json["data"])
 
 
 if __name__ == "__main__":
