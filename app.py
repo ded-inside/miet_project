@@ -1,9 +1,7 @@
-from flask import Flask, jsonify, abort
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, jsonify, abort, render_template
 from flask import request
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
-from flask import render_template
-import datetime
 
 
 app = Flask(__name__)
@@ -15,8 +13,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 db = SQLAlchemy(app)
 from models import *
 
-
 db.create_all()
+
+
+def get_member_data(mem):
+    certs_count = db.session.query(Certificate).filter_by(owner_id=mem.id).count()
+    return jsonify(
+        login=mem.login,
+        about=mem.about,
+        certificates=certs_count
+    )
 
 
 def get_member(token: str):
@@ -98,11 +104,6 @@ def login():
     return jsonify(code=200, token=sess.token)
 
 
-@app.route("/certificates/send")
-def certificates_send():
-    return "kk"
-
-
 @app.route("/<_login>")
 def _login(_login: str):
     if not _login:
@@ -112,7 +113,7 @@ def _login(_login: str):
     if not member:
         return abort(400)
 
-    return jsonify(200, data={"login": member.login, "about": member.about})
+    return jsonify(code=200, data={"login": member.login, "about": member.about})
 
 
 @app.route("/<_login>/schedule", methods=["GET"])
@@ -124,34 +125,23 @@ def _login_schedule(_login: str):
     if not member:
         return abort(400)
 
-    schedule_entries = db.session.query(ScheduleEntry).filter_by(id=member.id).all()
-    if not schedule_entries:
-        return abort(400)
+    schedule_entries = db.session.query(ScheduleEntry).filter_by(owner_id=member.id).all()
 
     schedule_array = []
     for entry in schedule_entries:
         schedule_array.append({
-            "DateTime": entry.date_time,
+            "DateTime": entry.date.strftime("%d/%m/%y %H:%M"),
             "Cost": entry.price,
-            "Duration": entry.duration
+            "Duration": entry.duration.strftime("%H:%M")
         })
 
-    return jsonify(code=200,
-                   data={
-                       "login": member.login,
-                       "certificates_count": schedule_entries.count(),
-                       "schedule": schedule_array
-                   })
-
-
-@app.route("/<_login>/schedule/buy")
-def _login_schedule_buy(_login: str):
-    schedule_id = 1
-    member = db.session.query(Member).filter_by(login=_login).first()
-    if not member:
-        return abort(400)
-
-    return "iii"
+    return jsonify(
+        code=200,
+        data={
+            "login": member.login,
+            "schedule": schedule_array
+        }
+    )
 
 
 @app.route("/schedule/add", methods=["POST", ])
@@ -184,13 +174,8 @@ def schedule_add():
     return jsonify(code=200)
 
 
-@app.route("/schedule/set")
-def schedule_set():
-    pass
-
-
-@app.route("/add/user", methods=['POST'])
-def add_member():
+@app.route("/register", methods=['POST'])
+def register():
     json = request.get_json()
     if not json:
         return abort(400)
@@ -205,12 +190,12 @@ def add_member():
 
     member = db.session.query(Member).filter_by(login=login).first()
     if member is not None:
-        return "login is already taken"
+        return jsonify(code=409, description="login is already taken")
 
     member = Member(login, password_hash)
     db.session.add(member)
     db.session.commit()
-    return "ok"
+    return jsonify(code=200)
 
 
 if __name__ == '__main__':
@@ -257,7 +242,7 @@ def invoke_user_buy_event(buyer, seller, schedule):
 
     db.session.commit()
 
-    return True
+    return None
 
 
 @app.route("/<_login>/schedule/<s_id>/buy", methods=["POST"])
@@ -279,7 +264,7 @@ def login_schedule_buy(_login: str, s_id: int):
     seller = db.session.query(Member).filter_by(login=_login).first()
 
     ret = invoke_user_buy_event(buyer, seller, schedule)
-    if ret != 1:
+    if ret:
         return jsonify(code=100, description=ret)
 
     return jsonify(code=200)
@@ -307,8 +292,8 @@ def transactions():
     data = {
         "Buy": [
             {
-                "Amount": i["0"],
-                "Date": i["date_time"]
+                "Amount": i[1],
+                "Date": i[0]
             }
             for i in trns_buy
         ],

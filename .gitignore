@@ -6,3 +6,6 @@ __pycache__
 
 app.db
 migrations
+test.db
+.coverage
+/tests/.coverage
