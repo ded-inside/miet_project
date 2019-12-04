@@ -39,7 +39,7 @@ class FronendTests(unittest.TestCase):
         return _json["token"]
 
     def logout(self, token):
-        return self.app.post("/login",
+        return self.app.post("/logout",
                              data=json.dumps(dict(token=token, )),
                              content_type='application/json'
                              )
@@ -125,6 +125,22 @@ class FronendTests(unittest.TestCase):
     def test_login_incorrect(self):
         response = self.login("Alice", "Bad_password")
         self.assertEqual(response.status_code, 400)
+
+    def test_logout(self):
+        token = self.loginGetToken("Alice", "Alice_password")
+        response = self.logout(token)
+
+        self.assertCodeEqual(response, 200)
+
+    def test_logout_incorrect_token(self):
+        token = self.loginGetToken("Alice", "Alice_password")
+        response = self.logout("Not" + token)
+
+        self.assertCodeEqual(response, 403)
+        self.assertDescriptionEqual(response, "Bad credentials")
+
+    def test_cant_get_info_after_logout(self):
+        pass
 
     def test_register_new_user(self):
         response = self.register("NewUser", "NewUser_password")
