@@ -166,6 +166,8 @@ class FronendTests(unittest.TestCase):
                                  content_type='application/json'
                                  )
         self.assertCodeEqual(response, 200)
+        _json = response.get_json()
+        self.assertDictEqual(_json["data"], dict(id=2))
 
     def test_buy_event(self):
         token = self.loginGetToken("Alice", "Alice_password")
@@ -198,7 +200,8 @@ class FronendTests(unittest.TestCase):
     def test_get_schedule(self):
         response = self.app.get('/Bob/schedule', follow_redirects=True)
         self.assertCodeEqual(response, 200)
-        ideal = {'login': 'Bob', 'schedule': [{'Cost': 40, 'DateTime': '25/12/19 00:00', 'Duration': '10:00'}]}
+        ideal = {'login': 'Bob',
+                 'schedule': [{"owner": "Bob", "id": 1, 'Cost': 40, 'DateTime': '25/12/19 00:00', 'Duration': '10:00'}]}
         self.assertDictEqual(response.get_json()["data"], ideal)
 
     def test_transaction(self):

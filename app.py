@@ -130,6 +130,8 @@ def _login_schedule(_login: str):
     schedule_array = []
     for entry in schedule_entries:
         schedule_array.append({
+            "owner": _login,
+            "id": entry.id,
             "DateTime": entry.date.strftime("%d/%m/%y %H:%M"),
             "Cost": entry.price,
             "Duration": entry.duration.strftime("%H:%M")
@@ -171,7 +173,7 @@ def schedule_add():
 
     db.session.commit()
 
-    return jsonify(code=200)
+    return jsonify(code=200, data={"id": se.id})
 
 
 @app.route("/register", methods=['POST'])
