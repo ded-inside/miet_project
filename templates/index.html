@@ -12,8 +12,13 @@
 			<p class="lead">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa, ipsam, eligendi, in quo sunt possimus non incidunt odit vero aliquid similique quaerat nam nobis illo aspernatur vitae fugiat numquam repellat.</p>
 			<a href="#" class="btn btn-primary btn-lg">Call to action!</a>
 		</header>
-
-		<div class="row text-center">
+        {% for mem in data %}
+            <div>
+                {{ mem }}
+                {% else %}
+            </div>
+        {% endfor %}
+        <div class="row text-center">
 			{% for card in cards %}
 			{{ macro.man_card(card['name'], card['image_url'], card['description']) }}
 			{% else %}

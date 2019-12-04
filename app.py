@@ -88,7 +88,7 @@ def index():
         'image_url': 'https://medialeaks.ru/wp-content/uploads/2019/05/yeah.jpg',
         'description': 'Рассо... Раса... Рамас... Рассол попил крч)0))'
     }]
-    return render_template('index.html', current='index', cards=cards)
+    return render_template('index.html', current='index', cards=cards, data=data)
 
 
 @app.route("/login", methods=['POST', 'GET'])
