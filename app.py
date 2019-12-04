@@ -83,7 +83,7 @@ def login():
 
     login = json["login"]
     pswd = json["password"]
-    remember = json["remember"]     # Null or "on" like false/true
+    # remember = json["remember"]     # Null or "on" like false/true
 
     if not (login and pswd):
         return abort(400)

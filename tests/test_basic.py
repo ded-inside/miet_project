@@ -29,8 +29,7 @@ class FronendTests(unittest.TestCase):
 
     def login(self, login, password):
         return self.app.post("/login",
-                             data=json.dumps(dict(login=login, password=password)),
-                             content_type='application/json'
+                             data=dict(login=login, password=password),
                              )
 
     def loginGetToken(self, login, password):
