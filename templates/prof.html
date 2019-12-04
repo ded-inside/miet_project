@@ -42,12 +42,20 @@
 					<li><a href="#">About</a></li>
 					<li><a href="#">Contact</a></li>
 				</ul>
-                <form method="post" action="/{{ login }}/schedule/buy">
+                <form method="post" action="{{ url_for('login_schedule_buy', _login=login) }}">
                     <span>Типо день:</span>
                     <input type="text" name="id" value="">
                     <button type="submit" name="button">Buy</button>
                     <input type="hidden" name="token" value="{{ request.cookies.get('token') }}">
                 </form>
+
+                {% if login == request.cookies.get('username') %}
+                <form action="{{ url_for('logout') }}" method="post">
+                    <button type="submit" name="logout">Вiйди отсюда</button>
+                    <input type="hidden" name="token" value="{{ request.cookies.get('token') }}">
+                </form>
+                {% endif %}
+
 			</nav>
 
 			<div class="colorlib-footer">

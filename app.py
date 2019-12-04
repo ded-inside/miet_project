@@ -231,14 +231,11 @@ def register():
     return jsonify(code=200)
 
 
-if __name__ == '__main__':
-    print("LOL")
-    app.run()
-
-
 @app.route("/logout", methods=["POST"])
 def logout():
-    json = request.get_json()
+    print(request)
+    json = request.form.to_dict()
+    print(json)
     if not json:
         return abort(400)
 
@@ -252,7 +249,11 @@ def logout():
     db.session.delete(session)
     db.session.commit()
 
-    return jsonify(code=200)
+    # return jsonify(code=200)
+    ret = make_response(redirect('/'))
+    ret.set_cookie('token', '', max_age=0)
+    ret.set_cookie('username', '', max_age=0)
+    return ret
 
 
 def invoke_user_buy_event(buyer, seller, schedule):
@@ -279,7 +280,7 @@ def invoke_user_buy_event(buyer, seller, schedule):
 
 
 @app.route("/<_login>/schedule/buy", methods=["POST"])
-def login_schedule_buy(_login):
+def login_schedule_buy(_login: str):
     json = request.form
     if not json:
         print('sched.buy: null')
@@ -348,3 +349,8 @@ def transactions():
     }
 
     return jsonify(code=200, data=data)
+
+
+if __name__ == '__main__':
+    print("LOL")
+    app.run()
