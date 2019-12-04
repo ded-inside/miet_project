@@ -141,8 +141,22 @@ def _login(_login: str):
     if not member:
         return abort(400)
 
+    schedule_entries = db.session.query(ScheduleEntry).filter_by(owner_id=member.id).all()
+
+    schedule_array = []
+    for entry in schedule_entries:
+        schedule_array.append({
+            "Owner": _login,
+            "Id": entry.id,
+            "DateTime": entry.date.strftime("%d/%m/%y %H:%M"),
+            "Cost": entry.price,
+            "Duration": entry.duration.strftime("%H:%M"),
+            "Name": entry.name,
+            "About": entry.about
+        })
+
     # return jsonify(code=200, data={"login": member.login, "about": member.about})
-    return render_template('prof.html', login=_login)
+    return render_template('prof.html', user=member, shedules=schedule_array)
 
 
 @app.route("/<_login>/schedule", methods=["GET"])

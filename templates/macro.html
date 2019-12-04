@@ -18,3 +18,27 @@
 		</div>
 	</div>
 {% endmacro %}
+
+{% macro shed_card(shedule) %}
+    <div class="col-md-4">
+        <div class="blog-entry ftco-animate">
+            <div class="text text-2 pt-2 mt-3">
+                <span class="category mb-3 d-block"><a>А стоит это счастье {{ shedule.Cost }} у.е.</a></span>
+                <h3 class="mb-4"><a>{{ shedule.Name }}</a></h3>
+                <p class="mb-4">Свободно</p>
+                <div class="author mb-4 d-flex align-items-center">
+                    <a href="#" class="img" style="background-image: url(images/person_2.jpg);"></a>
+                    <div class="ml-3 info">
+                        <h3><span>Date</span><span> {{ shedule.DateTime }}</span></h3>
+                        <h3><span>Duration</span><span> {{ shedule.Duration }}</span></h3>
+                    </div>
+                </div>
+                <div class="meta-wrap align-items-center">
+                    <div class="half">
+                        <p><a href="#" class="btn py-2">Buy<span class="ion-ios-arrow-forward"></span></a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
