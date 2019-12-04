@@ -104,11 +104,6 @@ def login():
     return jsonify(code=200, token=sess.token)
 
 
-@app.route("/certificates/send")
-def certificates_send():
-    return "kk"
-
-
 @app.route("/<_login>")
 def _login(_login: str):
     if not _login:
@@ -149,16 +144,6 @@ def _login_schedule(_login: str):
     )
 
 
-@app.route("/<_login>/schedule/buy")
-def _login_schedule_buy(_login: str):
-    schedule_id = 1
-    member = db.session.query(Member).filter_by(login=_login).first()
-    if not member:
-        return abort(400)
-
-    return "iii"
-
-
 @app.route("/schedule/add", methods=["POST", ])
 def schedule_add():
     # "Sun, 24 Nov 2019 22:59:44 GMT"
@@ -187,11 +172,6 @@ def schedule_add():
     db.session.commit()
 
     return jsonify(code=200)
-
-
-@app.route("/schedule/set")
-def schedule_set():
-    pass
 
 
 @app.route("/register", methods=['POST'])
