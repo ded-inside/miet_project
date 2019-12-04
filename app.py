@@ -5,7 +5,6 @@ from flask import render_template
 import datetime
 from flask_sqlalchemy import SQLAlchemy
 
-
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.debug = True
@@ -18,12 +17,28 @@ from models import *
 db.create_all()
 
 
-def get_member_data(mem: Member):
-    certs_count = db.session.query(Certificate).filter_by(owner_id=mem.id).count()
-    return jsonify(
+def get_event_data(entry: ScheduleEntry):
+    owner = db.session.query(Member).filter_by(id=entry.owner_id).first()
+    data = {"Owner": owner.login,
+            "Id": entry.id,
+            "DateTime": entry.date.strftime("%d/%m/%y %H:%M"),
+            "Cost": entry.price,
+            "Duration": entry.duration.strftime("%H:%M"),
+            "Name": entry.name,
+            "About": entry.about
+            }
+    return data
+
+
+def get_public_member_data(mem: Member):
+    events = db.session.query(ScheduleEntry).filter_by(owner_id=mem.id, buyer_id=None).all()
+    return dict(
         login=mem.login,
         about=mem.about,
-        certificates=certs_count
+        events=[
+            get_event_data(e)
+            for e in events
+        ],
     )
 
 
