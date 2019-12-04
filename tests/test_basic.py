@@ -56,8 +56,8 @@ class FronendTests(unittest.TestCase):
         self.assertEqual(_json["description"], description)
 
     def buy_event(self, token, seller, _id):
-        return self.app.post(f"/{seller}/schedule/{_id}/buy",
-                             data=json.dumps(dict(token=token)),
+        return self.app.post(f"/{seller}/schedule/buy",
+                             data=json.dumps(dict(token=token, id=_id)),
                              content_type='application/json'
                              )
 
@@ -170,8 +170,8 @@ class FronendTests(unittest.TestCase):
 
     def test_buy_event(self):
         token = self.loginGetToken("Alice", "Alice_password")
-        response = self.app.post("/Bob/schedule/1/buy",
-                                 data=json.dumps(dict(token=token)),
+        response = self.app.post("/Bob/schedule/buy",
+                                 data=json.dumps(dict(token=token, id=1)),
                                  content_type='application/json'
                                  )
 
@@ -180,8 +180,8 @@ class FronendTests(unittest.TestCase):
     def test_buy_event_with_not_enough_certificates(self):
         self.register("NewUser", "NewUser_password")
         token = self.loginGetToken("NewUser", "NewUser_password")
-        response = self.app.post("/Bob/schedule/1/buy",
-                                 data=json.dumps(dict(token=token)),
+        response = self.app.post("/Bob/schedule/buy",
+                                 data=json.dumps(dict(token=token, id=1)),
                                  content_type='application/json'
                                  )
         self.assertCodeEqual(response, 100)

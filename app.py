@@ -273,14 +273,18 @@ def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry
     return None
 
 
-@app.route("/<_login>/schedule/<s_id>/buy", methods=["POST"])
-def login_schedule_buy(_login: str, s_id: int):
+@app.route("/<_login>/schedule/buy", methods=["POST"])
+def login_schedule_buy(_login: str):
     json = request.get_json()
     if not json:
         return abort(400)
 
     token = json["token"]
     if not token:
+        return abort(400)
+
+    s_id = json["id"]
+    if not s_id:
         return abort(400)
 
     session = db.session.query(Session).filter_by(token=token).first()
