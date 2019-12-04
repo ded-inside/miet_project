@@ -179,6 +179,12 @@ class BasicTests(unittest.TestCase):
         self.assertCodeEqual(response, 100)
         self.assertDescriptionEqual(response, "Already bought")
 
+    def test_get_schedule(self):
+        response = self.app.get('/Bob/schedule', follow_redirects=True)
+        self.assertCodeEqual(response, 200)
+        ideal = {'login': 'Bob', 'schedule': [{'Cost': 40, 'DateTime': '25/12/19 00:00', 'Duration': '10:00'}]}
+        self.assertDictEqual(response.get_json()["data"], ideal)
+
 
 
 if __name__ == "__main__":
