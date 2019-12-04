@@ -15,7 +15,7 @@ from models import *
 TEST_DB = 'app.db'
 
 
-class BasicTests(unittest.TestCase):
+class FronendTests(unittest.TestCase):
 
     ########################
     #### helper methods ####
@@ -185,6 +185,34 @@ class BasicTests(unittest.TestCase):
         ideal = {'login': 'Bob', 'schedule': [{'Cost': 40, 'DateTime': '25/12/19 00:00', 'Duration': '10:00'}]}
         self.assertDictEqual(response.get_json()["data"], ideal)
 
+    def test_transaction(self):
+        token = self.loginGetToken("Alice", "Alice_password")
+
+        self.buy_event(token, "Bob", 1)
+
+        response = self.app.post("/transactions",
+                                 data=json.dumps(dict(token=token)),
+                                 content_type='application/json'
+                                 )
+        # todo fix date
+        ideal = {'Buy': [], 'Sell': [{'Amount': 40, 'Date': ""}]}
+        _json = response.get_json()
+        _json["data"]["Sell"][0]["Date"] = ""
+
+        self.assertDictEqual(ideal, _json["data"])
+
+        token = self.loginGetToken("Bob", "Bob_password")
+
+        ideal = {'Sell': [], 'Buy': [{'Amount': 40, 'Date': ""}]}
+        response = self.app.post("/transactions",
+                                 data=json.dumps(dict(token=token)),
+                                 content_type='application/json'
+                                 )
+
+        _json = response.get_json()
+        _json["data"]["Buy"][0]["Date"] = ""
+
+        self.assertDictEqual(ideal, _json["data"])
 
 
 if __name__ == "__main__":
