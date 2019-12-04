@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, abort, render_template
 from flask import request
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
+from flask import render_template
+import datetime
+from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
@@ -74,12 +76,14 @@ def login():
     if request.method == 'GET':
         return render_template('login.html', current='login')
 
-    json = request.get_json()
+    json = request.form
+
     if not json:
         return abort(400)
 
     login = json["login"]
     pswd = json["password"]
+    remember = json["remember"]     # Null or "on" like false/true
 
     if not (login and pswd):
         return abort(400)
