@@ -68,12 +68,14 @@ def login():
     if request.method == 'GET':
         return render_template('login.html', current='login')
 
-    json = request.get_json()
+    json = request.form
+
     if not json:
         return abort(400)
 
     login = json["login"]
     pswd = json["password"]
+    remember = json["remember"]     # Null or "on" like false/true
 
     if not (login and pswd):
         return abort(400)
@@ -235,7 +237,7 @@ def logout():
     return jsonify(code=200)
 
 
-def invoke_user_buy_event(buyer: Member, seller: Member, schedule: ScheduleEntry):
+def invoke_user_buy_event(buyer, seller, schedule):
     certs = list(db.session.query(Certificate).filter_by(owner_id=buyer.id).all())
 
     if not (schedule.buyer_id is None):
