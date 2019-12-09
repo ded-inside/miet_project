@@ -19,6 +19,24 @@
 	</div>
 {% endmacro %}
 
+{% macro card_man(user) %}
+    <div class="card-man">
+        <a href="{{ user.profile }}">
+            <img src="{{ user.image }}" alt="">
+            <div class="hover-content">
+                <div class="line"></div>
+				<div class="bg">
+	                <p>{{ user.job }}</p>
+	                <h4>{{ user.name }}</h4>
+				</div>
+            </div>
+			<div class="description-content">
+				<p>{{ user.about }}</p>
+			</div>
+        </a>
+    </div>
+{% endmacro %}
+
 {% macro shed_card(shedule) %}
     <div class="col-md-4">
         <div class="blog-entry ftco-animate">

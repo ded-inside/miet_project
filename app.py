@@ -67,28 +67,43 @@ def index():
     for m in members:
         data.append(get_public_member_data(m))
     print(data)
-    cards = [{
-        'name': 'Danny 1',
-        'image_url': 'https://i.ytimg.com/vi/5EWp3vq5jlU/maxresdefault.jpg',
-        'description': 'Cool guy'
+    users = [{
+        'name': 'Meet the Danny 1',
+        'image': 'https://i.ytimg.com/vi/5EWp3vq5jlU/maxresdefault.jpg',
+		'job': 'Danny',
+        'about': 'Cool guy'
     }, {
-        'name': 'Danny 2',
-        'image_url': 'https://avatars.mds.yandex.net/get-zen_doc/125920/pub_5d85ee7fd5bbc300add0a4fc_5d85eead74f1bc00ad2cb1c5/scale_1200',
-        'description': 'Nice man!'
+        'name': 'Meet the Danny 2',
+        'image': 'https://avatars.mds.yandex.net/get-zen_doc/125920/pub_5d85ee7fd5bbc300add0a4fc_5d85eead74f1bc00ad2cb1c5/scale_1200',
+		'job': 'Danny',
+		'about': 'Nice man!'
     }, {
-        'name': 'Danny 3',
-        'image_url': 'https://memepedia.ru/wp-content/uploads/2019/10/denni-de-vito-mem.png',
-        'description': 'Ахахаха)'
+        'name': 'Meet the Danny 3',
+        'image': 'https://memepedia.ru/wp-content/uploads/2019/10/denni-de-vito-mem.png',
+		'job': 'Danny',
+        'about': 'Ахахаха)'
     }, {
-        'name': 'Danny 4',
-        'image_url': 'https://img01.rl0.ru/afisha/1500x-/daily.afisha.ru/uploads/images/2/7f/27f7e31c0faf2dcd0c666849ba15e919.jpg',
-        'description': 'Marry me!'
+        'name': 'Meet the Danny 4',
+        'image': 'https://img01.rl0.ru/afisha/1500x-/daily.afisha.ru/uploads/images/2/7f/27f7e31c0faf2dcd0c666849ba15e919.jpg',
+		'job': 'Danny',
+        'about': 'Marry me!'
     }, {
-        'name': 'Danny 5',
-        'image_url': 'https://medialeaks.ru/wp-content/uploads/2019/05/yeah.jpg',
-        'description': 'Рассо... Раса... Рамас... Рассол попил крч)0))'
-    }]
-    return render_template('index.html', current='index', cards=cards)
+        'name': 'Meet the Danny 5',
+        'image': 'https://medialeaks.ru/wp-content/uploads/2019/05/yeah.jpg',
+		'job': 'Danny',
+        'about': 'Рассо... Раса... Рамас... Рассол попил крч)0))'
+    }, {
+		'name': 'Bob Ross',
+		'image': 'https://d7hftxdivxxvm.cloudfront.net/?resize_to=width&src=https%3A%2F%2Fartsy-media-uploads.s3.amazonaws.com%2FSbTNJRfAAY3BYz9gIYJTLA%252FBob%2BRoss%2Balso%2B%25281%2529.jpg&width=1200&quality=80',
+		'job': 'Drawer',
+		'about': '[Pain]t'
+	}, {
+		'name': 'Amazing tour to the Wonderland with F̶r̶a̶n̶ ̶B̶o̶w̶! Alice',
+		'image': 'https://i.pinimg.com/originals/10/f6/00/10f600ded71cf5a211a716000875928b.jpg',
+		'job': 'Cute girl',
+		'about': 'Увлекательное путешествие в мир ̶к̶о̶ш̶м̶а̶р̶о̶в̶ ̶и̶ ̶о̶т̶ч̶а̶я̶н̶и̶я̶ пушистых зверей и интересных игр!'
+	}]
+    return render_template('index.html', current='index', users=users)
 
 
 @app.route("/login", methods=['POST', 'GET'])
@@ -363,6 +378,11 @@ def transactions():
     }
 
     return jsonify(code=200, data=data)
+
+
+@app.route('/debug/base')
+def debug_base():
+    return render_template('base.html')
 
 
 if __name__ == '__main__':
